@@ -1,7 +1,7 @@
 import build from './build';
 import schema from './schema';
 
-const validator = require('../validator')(schema);
+const validator = require('../_validator')(schema);
 
 const makeStudent = build({
   validator

@@ -1,4 +1,5 @@
 import { Pool, PoolClient, PoolConfig, QueryConfig, QueryResult } from 'pg';
+import DB from './types';
 
 const config: PoolConfig = {
   user: process.env.POSTGRES_USER || 'sample_user',
@@ -10,8 +11,10 @@ const config: PoolConfig = {
 
 const pool = new Pool(config);
 
-export default {
+const db: DB = {
   query: (text: string | QueryConfig<any>, values?: any[]): Promise<QueryResult<any>> => pool.query(text, values),
   connect: (): Promise<PoolClient> => pool.connect(),
   end: (): Promise<void> => pool.end()
 };
+
+export default db;

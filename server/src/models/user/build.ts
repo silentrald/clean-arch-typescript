@@ -1,6 +1,6 @@
 import { INVALID_USER } from '@error';
 
-import { User, UserSchema } from './intf';
+import { User, UserSchema } from './types';
 
 const build = ({ validator }) => ({
   username,

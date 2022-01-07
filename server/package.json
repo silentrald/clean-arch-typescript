@@ -32,6 +32,7 @@
     "express-handlebars": "^5.2.1",
     "express-session": "^1.17.1",
     "ioredis": "^4.24.2",
+    "knex": "^0.95.15",
     "module-alias": "^2.2.2",
     "morgan": "^1.10.0",
     "nodemailer": "^6.5.0",
@@ -77,12 +78,13 @@
     }
   },
   "_moduleAliases": {
-    "@mw": "dist/mw",
-    "@intf": "dist/intf",
-    "@modules": "dist/modules",
+    "@helpers": "dist/helpers",
+    "@infrastructure": "dist/infrastructure",
     "@models": "dist/models",
-    "@db": "dist/db/index",
-    "@logger": "dist/logger/index",
-    "@redis": "dist/redis/index"
+    "@use-cases": "dist/use-cases",
+    "@mw": "dist/rest/mw",
+    "@app": "dist/app",
+    "@config": "dist/config",
+    "@error": "dist/error"
   }
 }

@@ -1,12 +1,13 @@
-import { User } from '@models/user/intf';
+import DB from '@infrastructure/db/types';
+import { UserList } from './types';
 
 const makeUserList = ({
-  db, hashFunction
-}) => {
+  db
+}: {
+  db: DB
+}): UserList => {
   return Object.freeze({
-    add: async (user: User): Promise<void> => {
-      const hash = await hashFunction(user.getPassword());
-
+    add: async (user) => {
       await db.query(`
         INSERT INTO users (
           username,
@@ -18,14 +19,14 @@ const makeUserList = ({
         VALUES($1, $2, $3, $4, $5)
       `, [
         user.getUsername(),
-        hash,
+        user.getPassword(),
         user.getEmail(),
         user.getFname(),
         user.getLname()
       ]);
     },
 
-    getById: async (id: string): Promise<any> => {
+    getById: async (id) => {
       const {
         rows: users
       } = await db.query(`
@@ -37,7 +38,7 @@ const makeUserList = ({
       return users[0];
     },
 
-    getByUsername: async (username: string): Promise<any> => {
+    getByUsername: async (username) => {
       const {
         rows: users
       } = await db.query(`
@@ -49,7 +50,7 @@ const makeUserList = ({
       return users[0];
     },
 
-    updateById: async (id: string, user: User): Promise<void> => {
+    updateById: async (id, user) => {
       await db.query(`
         UPDATE  users
         SET     username = $1,
@@ -64,13 +65,6 @@ const makeUserList = ({
         user.getLname(),
         id
       ]);
-    },
-
-    removeById: async (id: string): Promise<void> => {
-      await db.query(`
-        DELETE  users
-        WHERE   id = $1;
-      `, [ id ]);
     },
   });
 };

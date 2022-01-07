@@ -1,5 +1,5 @@
 import { JSONSchemaType } from 'ajv';
-import { UserSchema } from './intf';
+import { UserSchema } from './types';
 
 const schema: JSONSchemaType<UserSchema> = {
   type: 'object',

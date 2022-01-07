@@ -49,25 +49,13 @@ app.use(cookieParser());
 
 app.use(csrf({ cookie: true }));
 
-// DEBUG
-// app.use((req: Request, _res: Response, next: NextFunction): void => {
-//     console.log(req.sessionID);
-//     next();
-// });
-
 // APIS
 for (const method of ['get', 'post']) {
-  for (const file of getFiles(path.join(__dirname, `api/${method}`)).map(file => `/${file.slice(0, -3)}`)) {
+  for (const file of getFiles(path.join(__dirname, 'rest', 'api', method)).map(file => `/${file.slice(0, -3)}`)) {
     const route = `/api${file.replace(/_/g, ':').replace(/\\/g, '/')}`;
-    app[method](route.endsWith('/index') ? route.slice(0, -6) : route, require(`./api/${method}${file}`).default);
+    app[method](route.endsWith('/index') ? route.slice(0, -6) : route, require(`./rest/api/${method}${file}`).default);
   }
 }
-
-// STATIC and UPLOADS
-// if (process.env.NODE_ENV === 'development') {
-// app.use('/', express.static(path.join(__dirname, 'static')));
-// app.use(express.static(path.join(__dirname, 'uploads')));
-// }
 
 const server = app.listen(PORT, HOST, () => {
   logger.info(`Listening to port ${PORT}`);
