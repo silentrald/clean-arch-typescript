@@ -1,0 +1,8 @@
+[Unit]
+Description=<Name Here>
+
+[Service]
+ExecStart=/usr/bin/yarn start
+Restart=always
+RestartSec=60
+WorkingDirectory=<directory of the folder>

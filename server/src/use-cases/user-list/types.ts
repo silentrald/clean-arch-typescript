@@ -1,8 +1,15 @@
-import { User } from '@models/user/types';
+import { UserDb } from 'db/user/types';
+import { User } from 'entities/user/types';
+
+export interface UserListConfig {
+  userDb: UserDb;
+}
 
 export interface UserList {
-    add: (user: User) => Promise<void>;
-    getById: (id: string) => Promise<any>;
-    getByUsername: (username: string) => Promise<any>;
-    updateById: (id: string, user: User) => Promise<void>;
+  addUser: (user: User) => Promise<void>;
+  getUserById: (id: string) => Promise<User>;
+  getUserByUsername: (username: string) => Promise<User>;
+  updateUser: (user: User) => Promise<boolean>;
+  updateUserPassword: (user: User) => Promise<boolean>;
+  deleteUserById: (id: string) => Promise<boolean>;
 }

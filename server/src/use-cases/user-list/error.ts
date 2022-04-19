@@ -1,13 +1,10 @@
+import { UseCaseError } from '@use-cases/error';
 
-
-class UserListError extends Error {
-    code: number;
-
-    constructor(code: number) {
-      super();
-
-      this.code = code;
-    }
+class UserListError extends UseCaseError {
+  constructor(errors: string[]) {
+    super(errors);
+    this.name = 'UserListError';
+  }
 }
 
 export default UserListError;

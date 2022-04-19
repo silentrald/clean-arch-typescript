@@ -1,8 +1,0 @@
-{
-    "scripts": {
-        "dev": "nuxt start --dotenv .env.development",
-        "build": "nuxt build --dotenv .env.production",
-        "prod": "rm ../production/client/dist && cp ../prodcution/client",
-        "start": "nuxt start"
-    }
-}

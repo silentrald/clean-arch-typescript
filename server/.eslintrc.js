@@ -1,3 +1,5 @@
+const ERROR = 2;
+
 module.exports = {
   env: {
     commonjs: true,
@@ -5,33 +7,56 @@ module.exports = {
     node: true,
     jest: true,
   },
-  extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-  ],
+  extends: [ 'eslint:recommended', 'plugin:@typescript-eslint/recommended' ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 12,
     sourceType: 'module',
   },
-  plugins: [
-    '@typescript-eslint',
-  ],
+  plugins: [ '@typescript-eslint' ],
   rules: {
-    indent: [
-      'error',
-      2,
-    ],
-    quotes: [
-      'error',
-      'single',
-    ],
-    semi: [
-      'error',
-      'always',
-    ],
+    'max-len': [ ERROR, {
+      code: 100,
+    } ],
+    indent: [ ERROR, 2 ],
+    quotes: [ ERROR, 'single' ],
+    semi: [ ERROR, 'always' ],
+    'array-bracket-spacing': [ ERROR, 'always' ],
+    'array-bracket-newline': [ ERROR, {
+      minItems: 3,
+    } ],
+    'array-element-newline': [ ERROR, {
+      minItems: 3,
+    } ],
+    'object-property-newline': ERROR,
+    'object-curly-spacing': [ ERROR, 'always' ],
+    'object-curly-newline': [ 'error', {
+      ObjectExpression: {
+        multiline: true,
+        minProperties: 1,
+      },
+      ObjectPattern: {
+        multiline: true,
+        minProperties: 3,
+      },
+      ImportDeclaration: {
+        multiline: true,
+        minProperties: 3,
+      },
+      ExportDeclaration: 'always',
+    } ],
+    'operator-linebreak': [ ERROR, 'after' ],
+    'no-trailing-spaces': ERROR,
+    'comma-dangle': [ ERROR, {
+      arrays: 'never',
+      objects: 'always',
+      imports: 'never',
+      exports: 'never',
+      functions: 'never',
+    } ],
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-var-requires': 'off',
     '@typescript-eslint/no-non-null-assertion': 'off',
+    '@typescript-eslintexplicit-module-boundary-types': 'off',
   },
 };

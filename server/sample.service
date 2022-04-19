@@ -1,8 +1,0 @@
-[Unit]
-Description=<Name Here>
-
-[Service]
-ExecStart=<path to yarn> start
-Restart=always
-RestartSec=60
-WorkingDirectory=<directory of the folder>
