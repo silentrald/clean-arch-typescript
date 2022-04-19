@@ -13,6 +13,15 @@ const validate = (user: UserSchema): string[] | undefined => {
   }
 };
 
+const sanitize = (user: UserSchema) => {
+  user.username = user.username.trim();
+  user.email = user.email.trim();
+  user.fname = user.fname.trim();
+  user.lname = user.lname.trim();
+
+  return user;
+};
+
 const makeHash = (pass: string) => {
   return bcrypt.hashSync(pass, 8);
 };
@@ -23,6 +32,7 @@ const compareHash = (pass: string, hash: string) => {
 
 const makeUser = buildMakeUser({
   validate,
+  sanitize,
   makeHash,
   compareHash,
 });

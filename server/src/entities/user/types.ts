@@ -18,6 +18,7 @@ export interface User extends Entity<UserSchema> {
 
 export interface BuildMakeUserConfig {
   validate: (user: UserSchema) => string[] | undefined;
+  sanitize: (user: UserSchema) => UserSchema;
   makeHash: (pass: string) => string;
   compareHash: (pass: string, hash: string) => boolean;
 }

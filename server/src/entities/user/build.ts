@@ -7,7 +7,7 @@ import {
 } from './types';
 
 const buildMakeUser = ({
-  validate, makeHash, compareHash,
+  validate, sanitize, makeHash, compareHash,
 }: BuildMakeUserConfig) => ({
   id,
   username,
@@ -16,7 +16,7 @@ const buildMakeUser = ({
   fname,
   lname,
 }: UserSchema): User => {
-  const user = {
+  let user: UserSchema = {
     username,
     password,
     email,
@@ -28,6 +28,8 @@ const buildMakeUser = ({
   if (errors) {
     throw new UserError(errors);
   }
+
+  user = sanitize(user);
 
   let hash = '';
   return Object.freeze({
