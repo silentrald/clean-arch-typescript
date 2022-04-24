@@ -1,9 +1,8 @@
-import fieldsToSchema from '@modules/fields';
+import columnsToSchema from '@modules/columns';
 import { createValidatorErrors } from 'modules/validate';
-import userFields from './fields';
+import { userColumns } from './db';
 
-const userSchema = fieldsToSchema(userFields);
+const userSchema = columnsToSchema(userColumns);
 createValidatorErrors(userSchema);
-console.log(userSchema);
 
 export default userSchema;

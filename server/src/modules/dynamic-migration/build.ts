@@ -1,27 +1,34 @@
 import { camelToSnakeCase } from '@helpers/string';
-import { StringField, URIField } from '@modules/fields/types';
 import knex from 'knex';
 import { DynamicMigrationConfig, DynamicMigrationBuilderConfig } from './types';
 
 const buildMakeDynamicMigration = ({ client, }: DynamicMigrationBuilderConfig) => {
   const qb = knex({
     client,
+    log: {
+      warn() {
+        //
+      },
+    },
   });
 
   return <S> ({
-    fields,
+    columns,
     table,
     schema = 'public',
+    constraints,
   }: DynamicMigrationConfig<S>) => {
-    let primary = false;
     const up = qb.schema.withSchema(schema).createTableIfNotExists(table, (t) => {
-      for (const field in fields) {
+      for (const col in columns) {
         let tmp: any;
-        const val = fields[field];
-        const name = camelToSnakeCase(field);
+        const val = columns[col];
+        const name = camelToSnakeCase(col);
         switch (val.type) {
         case 'string':
-          tmp = t.string(name, (val as StringField).max);
+          if (val.max)
+            tmp = t.string(name, val.max);
+          else
+            tmp = t.text(name);
           break;
         case 'uuid':
           tmp = t.uuid(name);
@@ -30,16 +37,33 @@ const buildMakeDynamicMigration = ({ client, }: DynamicMigrationBuilderConfig) =
           tmp = t.string(name, 256);
           break;
         case 'uri':
-          tmp = t.string(name, (val as URIField).max);
+          tmp = t.string(name, val.max);
+          break;
+        case 'serial':
+          tmp = t.increments(name, {
+            primaryKey: false,
+          });
           break;
         case 'int':
           tmp = t.integer(name);
           break;
         case 'float':
-          tmp = t.float(name);
+          if (val.precision && val.scale) {
+            tmp = t.float(name, val.precision, val.scale);
+          } else if (val.precision) {
+            tmp = t.float(name, val.precision);
+          } else {
+            tmp = t.float(name, 6, 2); // TODO: Changeable
+          }
           break;
         case 'decimal':
-          tmp = t.decimal(name);
+          if (val.precision && val.scale) {
+            tmp = t.decimal(name, val.precision, val.scale);
+          } else if (val.precision) {
+            tmp = t.decimal(name, val.precision);
+          } else {
+            tmp = t.decimal(name, 12, 2); // TODO: Changeable
+          }
           break;
         case 'boolean':
           tmp = t.boolean(name);
@@ -55,17 +79,20 @@ const buildMakeDynamicMigration = ({ client, }: DynamicMigrationBuilderConfig) =
             useTz: true,
           });
           break;
+        case 'array':
+          if (val.data !== 'string')
+            continue;
+          tmp = t.string(name);
+          break;
+        case 'binary':
+          tmp = t.binary(name);
+          break;
         default:
-          throw new Error(`Invalid type: ${val.type}`); // TODO: Proper error
+          throw new Error(`Invalid type: ${(val as any).type}`); // TODO: Proper error
         }
 
         if (val.nullable !== true) {
           tmp = tmp.notNullable();
-        }
-
-        if (val.references) {
-          const { col, table, } = val.references;
-          tmp = tmp.references(col).inTable(table);
         }
 
         if (val.default) {
@@ -76,16 +103,34 @@ const buildMakeDynamicMigration = ({ client, }: DynamicMigrationBuilderConfig) =
           }
         }
 
-        if (val.primary) {
-          if (primary) {
-            throw new Error('Only 1 primary is allowed'); // TODO: Proper error
-          }
-          primary = true;
-          tmp = tmp.primary();
-        }
+        // if (val.unique) {
+        //   tmp = tmp.unique();
+        // }
 
-        if (val.unique) {
-          tmp = tmp.unique();
+        // Always last
+        if (val.references) {
+          const {
+            col, table, name: n, del,
+          } = val.references;
+          tmp = t.foreign(name, n).references(col).inTable(table);
+          if (del) {
+            tmp = tmp.onDelete('cascade');
+          }
+        }
+      }
+
+      const { primary, unique, } = constraints;
+      if (primary) {
+        t.primary([ primary.col as string ], {
+          constraintName: primary.name,
+        });
+      }
+
+      if (unique) {
+        for (const { columns, name, } of unique) {
+          t.unique((columns as string[]).map((c) => camelToSnakeCase(c)), {
+            indexName: name,
+          });
         }
       }
     }).toQuery() + ';';

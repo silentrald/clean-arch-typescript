@@ -15,22 +15,22 @@ const makeUserDb = ({
   const TABLE = `${schema}.${table}`;
 
   const userDbClient: UserDbClient = {
-    getById: async (client, id, fields) => {
-      const { query, values, } = dynamicSelectOne!('id', id, fields);
+    getById: async (client, id, columns) => {
+      const { query, values, } = dynamicSelectOne!('id', id, columns);
       const { rows, } = await client.query<UserSchema>(query, values);
 
       return rows[0];
     },
 
-    getByUsername: async (client, username, fields) => {
-      const { query, values, } = dynamicSelectOne!('username', username, fields);
+    getByUsername: async (client, username, columns) => {
+      const { query, values, } = dynamicSelectOne!('username', username, columns);
       const { rows, } = await client.query<UserSchema>(query, values);
 
       return rows[0];
     },
 
-    getByEmail: async (client, email, fields) => {
-      const { query, values, } = dynamicSelectOne!('email', email, fields);
+    getByEmail: async (client, email, columns) => {
+      const { query, values, } = dynamicSelectOne!('email', email, columns);
       const { rows, } = await client.query<UserSchema>(query, values);
 
       return rows[0];
@@ -80,9 +80,9 @@ const makeUserDb = ({
   };
 
   return Object.freeze({
-    getById: (id, fields) => userDbClient.getById(db, id, fields),
-    getByUsername: (username, fields) => userDbClient.getById(db, username, fields),
-    getByEmail: (email, fields) => userDbClient.getById(db, email, fields),
+    getById: (id, columns) => userDbClient.getById(db, id, columns),
+    getByUsername: (username, columns) => userDbClient.getById(db, username, columns),
+    getByEmail: (email, columns) => userDbClient.getById(db, email, columns),
     add: (user) => userDbClient.add(db, user),
     updateWithoutPassword: (user) => userDbClient.updateWithoutPassword(db, user),
     updatePassword: (user) => userDbClient.updatePassword(db, user),

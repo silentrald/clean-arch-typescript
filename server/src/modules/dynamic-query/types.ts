@@ -4,19 +4,32 @@ export interface Query {
   values?: any[];
 }
 
-export type QueryConditional = '=' | '!=' | '>=' | '>' | '<=' | '<'
+export type QueryConditional = '=' | '!=' | '>=' | '>' | '<=' | '<' | 'in'
 
-export interface QueryFilter<S> {
-  field: keyof S;
-  condition: QueryConditional;
+interface QueryFilterOperator<S> {
+  col: keyof S;
+  condition: '=' | '!=' | '>=' | '>' | '<=' | '<';
   value: any;
 }
 
+interface QueryFilterIn<S> {
+  col: keyof S;
+  condition: 'in';
+  value: any[];
+}
+
+export type QueryFilter<S> = QueryFilterOperator<S> | QueryFilterIn<S>
+
 export type DynamicQuery<E, S> = {
   dynamicInsert: (entity: E) => Query;
-  dynamicSelectOne: (field: (keyof S), id: string | number, fields?: (keyof S)[]) => Query;
-  dynamicSelectAll: (fields?: (keyof S)[]) => Query;
-  dynamicSelectFilter: (filters: QueryFilter<S>[], fields?: (keyof S)[]) => Query;
+  dynamicInsertMany: (entities: E[]) => Query;
+  dynamicSelectOne: (col: (keyof S), id: string | number, columns?: (keyof S)[]) => Query;
+  dynamicSelectAll: (columns?: (keyof S)[], order?: { [K in keyof S]: 'asc' | 'desc' }) => Query;
+  dynamicSelectFilter: (
+    filters: QueryFilter<S>[],
+    columns?: (keyof S)[],
+    order?: { [K in keyof S]: 'asc' | 'desc' }
+  ) => Query;
   dynamicUpdate: (entity: E) => Query;
   dynamicDelete: (id: string | number) => Query;
 }
@@ -28,7 +41,7 @@ export interface DynamicQueryBuilderConfig {
 }
 
 export interface DynamicQueryConfig<E, S> {
-  fields: { [K in keyof S]: keyof E };
+  columns: { [K in keyof Partial<S>]: keyof E };
   primary: keyof S;
   table: string;
   schema: string;

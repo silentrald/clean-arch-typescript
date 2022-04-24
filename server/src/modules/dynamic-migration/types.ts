@@ -1,4 +1,4 @@
-import { Fields } from '@modules/fields/types';
+import { ColumnConstraint, Columns } from '@modules/columns/types';
 
 export type DynamicMigrationClients = 'pg' | 'mysql' | 'sqlite3';
 
@@ -7,7 +7,8 @@ export interface DynamicMigrationBuilderConfig {
 }
 
 export interface DynamicMigrationConfig<S> {
-  fields: Fields<S>;
+  columns: Columns<S>;
   table: string;
   schema: string;
+  constraints: ColumnConstraint<S>;
 }

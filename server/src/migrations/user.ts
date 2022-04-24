@@ -1,12 +1,15 @@
-import userFields from '@entities/user/fields';
+import {
+  userConstraint, userColumns, userTable
+} from '@entities/user/db';
 import { UserSchema } from '@entities/user/types';
 import makeDynamicMigration from '@modules/dynamic-migration';
 
 const {
   makeUp, makeIns, makeDel, makeDown,
 } = makeDynamicMigration<UserSchema>({
-  fields: userFields,
-  table: 'users',
+  columns: userColumns,
+  constraints: userConstraint,
+  table: userTable,
   schema: 'public',
 });
 

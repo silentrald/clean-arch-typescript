@@ -1,16 +1,16 @@
 import { JSONSchemaType } from 'ajv';
-import { Fields } from './types';
+import { Columns, ColumnToSchemaConfig } from './types';
 
-const makeFieldsToSchema = () => {
-  return <S>(fields: Fields<S>) => {
+const makeColumnsToSchema = ({ camelToSnakeCase, }: ColumnToSchemaConfig) => {
+  return <S> (columns: Columns<S>) => {
     const properties: { [key: string]: { [key: string]: any } } = {};
     const required: (keyof S)[] = [];
 
-    for (const field in fields) {
-      const val = fields[field];
+    for (const col in columns) {
+      const val = columns[col];
 
       if (val.required !== false)
-        required.push(field);
+        required.push(col);
 
       let property: { [key: string]: any } = {};
 
@@ -18,9 +18,13 @@ const makeFieldsToSchema = () => {
       case 'string':
         property = {
           type: 'string',
-          minLength: val.min,
-          maxLength: val.max,
         };
+        if (val.min)
+          property.minLength = val.min;
+        if (val.max)
+          property.maxLength = val.max;
+        if (val.pattern)
+          property.pattern = val.pattern;
         break;
       case 'uuid':
         property = {
@@ -40,20 +44,29 @@ const makeFieldsToSchema = () => {
           format: 'uri',
         };
         break;
+      case 'serial':
+        property = {
+          type: 'integer',
+        };
+        break;
       case 'int':
         property = {
-          type: 'int',
-          minimum: val.min,
-          maximum: val.max,
+          type: 'integer',
         };
+        if (val.min)
+          property.minimum = val.min;
+        if (val.max)
+          property.maximum = val.max;
         break;
       case 'float':
       case 'decimal':
         property = {
           type: 'number',
-          minimum: val.min,
-          maximum: val.max,
         };
+        if (val.min)
+          property.minimum = val.min;
+        if (val.max)
+          property.maximum = val.max;
         break;
       case 'boolean':
         property = {
@@ -75,7 +88,24 @@ const makeFieldsToSchema = () => {
       case 'timestamp':
         property = {
           type: 'string',
-          format: 'timestamp',
+          format: 'date-time',
+        };
+        break;
+      case 'array':
+        property = {
+          type: 'array',
+          items: {
+            type: val.itemType,
+          },
+        };
+        if (val.min)
+          property.minItems = val.min;
+        if (val.max)
+          property.maxItems = val.max;
+        break;
+      case 'binary':
+        property = {
+          type: 'string',
         };
         break;
       default:
@@ -86,7 +116,12 @@ const makeFieldsToSchema = () => {
         property.nullable = true;
       }
 
-      properties[field] = property;
+      properties[col] = property;
+    }
+
+    const requiredErrors: { [key: string]: string } = {};
+    for (const r of required) {
+      requiredErrors[r as string] = camelToSnakeCase(r as string) + '_req';
     }
 
     const schema: any = {
@@ -94,10 +129,13 @@ const makeFieldsToSchema = () => {
       properties,
       required,
       additionalProperties: false,
+      errorMessage: {
+        required: requiredErrors,
+      },
     };
 
     return schema as JSONSchemaType<S>;
   };
 };
 
-export default makeFieldsToSchema;
+export default makeColumnsToSchema;

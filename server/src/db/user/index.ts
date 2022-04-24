@@ -1,5 +1,5 @@
 
-import { makeDb } from 'db';
+import { makeDb } from '@db/index';
 import makeUserDb from './build';
 import { validate as validateUUID } from 'uuid';
 import makeDynamicQuery from '@modules/dynamic-query';
@@ -14,7 +14,7 @@ const {
   dynamicInsert,
   dynamicDelete,
 } = makeDynamicQuery<User, UserSchema>({
-  fields: {
+  columns: {
     id: 'getId',
     username: 'getUsername',
     password: 'getHash',
@@ -28,7 +28,7 @@ const {
 });
 
 const { dynamicUpdate, } = makeDynamicQuery<User, UserSchema>({
-  fields: {
+  columns: {
     id: 'getId',
     username: 'getUsername',
     email: 'getEmail',

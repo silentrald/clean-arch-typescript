@@ -1,12 +1,13 @@
-import { Fields } from '@modules/fields/types';
+import { ColumnConstraint, Columns } from '@modules/columns/types';
 import { UserSchema } from './types';
 
-const userFields: Fields<UserSchema> = {
+export const userTable = 'users';
+
+export const userColumns: Columns<UserSchema> = {
   id: {
     type: 'uuid',
     nullable: true,
     required: false,
-    primary: true,
   },
   username: {
     type: 'string',
@@ -35,4 +36,9 @@ const userFields: Fields<UserSchema> = {
   },
 };
 
-export default userFields;
+export const userConstraint: ColumnConstraint<UserSchema> = {
+  primary: {
+    col: 'id',
+    name: `${userTable}_pk`,
+  },
+};

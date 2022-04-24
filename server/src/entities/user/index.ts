@@ -1,7 +1,7 @@
 import buildMakeUser from './build';
 import { UserSchema } from './types';
 import userSchema from './schema';
-import { createValidator, parseValidatorErrors } from 'modules/validate';
+import { createValidator, parseValidatorErrors } from '@modules/validate';
 import bcrypt from 'bcrypt';
 
 const validator = createValidator(userSchema);

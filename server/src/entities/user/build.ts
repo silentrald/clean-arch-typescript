@@ -8,22 +8,8 @@ import {
 
 const buildMakeUser = ({
   validate, sanitize, makeHash, compareHash,
-}: BuildMakeUserConfig) => ({
-  id,
-  username,
-  password,
-  email,
-  fname,
-  lname,
-}: UserSchema): User => {
-  let user: UserSchema = {
-    username,
-    password,
-    email,
-    fname,
-    lname,
-  };
-
+}: BuildMakeUserConfig) => (
+  user: UserSchema): User => {
   const errors = validate(user);
   if (errors) {
     throw new UserError(errors);
@@ -33,37 +19,37 @@ const buildMakeUser = ({
 
   let hash = '';
   return Object.freeze({
-    getId: () => id,
-    getUsername: () => username,
-    getPassword: () => password,
-    getEmail: () => email,
-    getFname: () => fname,
-    getLname: () => lname,
+    getId: () => user.id,
+    getUsername: () => user.username,
+    getPassword: () => user.password,
+    getEmail: () => user.email,
+    getFname: () => user.fname,
+    getLname: () => user.lname,
 
     getHash: () => {
       if (hash) return hash;
 
-      if (!password) {
+      if (!user.password) {
         throw new UserError([ 'no_password' ]);
       }
 
-      hash = makeHash(password);
+      hash = makeHash(user.password);
       return hash;
     },
 
     setPasswordToHash: () => {
       if (hash) return;
 
-      if (!password) {
+      if (!user.password) {
         throw new UserError([ 'no_password' ]);
       }
 
-      hash = password;
-      password = undefined;
+      hash = user.password;
+      user.password = undefined;
     },
 
     removePassword: () => {
-      password = undefined;
+      user.password = undefined;
       hash = '';
     },
 

@@ -3,7 +3,7 @@ import { DynamicQuery } from '@modules/dynamic-query/types';
 import {
   Db,
   DbActionTransform, DbClient, EntityDbConfig
-} from 'db/types';
+} from '@db/types';
 
 export interface UserDbConfig<E, S> extends EntityDbConfig {
   validate: {
@@ -14,9 +14,9 @@ export interface UserDbConfig<E, S> extends EntityDbConfig {
 }
 
 export interface UserDbAction {
-  getById: (id: string, fields?: (keyof UserSchema)[]) => Promise<UserSchema>;
-  getByUsername: (username: string, fields?: (keyof UserSchema)[]) => Promise<UserSchema>;
-  getByEmail: (email: string, fields?: (keyof UserSchema)[]) => Promise<UserSchema>;
+  getById: (id: string, columns?: (keyof UserSchema)[]) => Promise<UserSchema>;
+  getByUsername: (username: string, columns?: (keyof UserSchema)[]) => Promise<UserSchema>;
+  getByEmail: (email: string, columns?: (keyof UserSchema)[]) => Promise<UserSchema>;
   add: (user: User) => Promise<string>;
   updateWithoutPassword: (user: User) => Promise<boolean>;
   updatePassword: (user: User) => Promise<boolean>;

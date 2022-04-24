@@ -11,23 +11,28 @@ const buildMakeDynamicQuery = ({ client, }: DynamicQueryBuilderConfig) => {
   });
 
   return <E, S> ({
-    fields,
+    columns,
     primary,
     table,
     schema = 'public',
   }: DynamicQueryConfig<E, S>): DynamicQuery<E, S> => {
     const methods: (keyof E)[] = [];
     const prepared: { [key: string]: any } = {};
+    let primaryMethod: keyof E | undefined;
 
     let i = 0;
     if (client === 'pg') {
-      for (const key in fields) {
-        methods.push(fields[key]);
+      for (const key in columns) {
+        if (key === primary) {
+          primaryMethod = columns[key];
+          continue;
+        }
+        methods.push(columns[key]);
         prepared[camelToSnakeCase(key)] = qb.raw(`$${++i}`);
       }
     } else if (client === 'mysql' || client === 'sqlite3') {
-      for (const key of Object.keys(fields).sort()) {
-        methods.push(fields[key]);
+      for (const key of Object.keys(columns).sort()) {
+        methods.push(columns[key]);
         prepared[camelToSnakeCase(key)] = qb.raw('?');
       }
     }
@@ -44,19 +49,15 @@ const buildMakeDynamicQuery = ({ client, }: DynamicQueryBuilderConfig) => {
     const upQuery = qb.withSchema(schema)
       .from(table)
       .update(prepared)
-      .toQuery();
+      .where(primaryKey, '=', qb.raw(client === 'pg' ? `$${++i}` : '?'))
+      .toQuery() + ';';
 
     // Delete Query
     const delQuery = qb.withSchema(schema)
       .from(table)
       .del()
-      .where(primaryKey, '=', client === 'pg' ? '$1' : '?')
-      .toQuery();
-
-    // Select Query
-    // TODO: Change this
-    const selQb = qb.withSchema(schema)
-      .from(table);
+      .where(primaryKey, '=', qb.raw(client === 'pg' ? '$1' : '?'))
+      .toQuery() + ';';
 
     return Object.freeze({
       dynamicInsert: (entity) => {
@@ -70,57 +71,103 @@ const buildMakeDynamicQuery = ({ client, }: DynamicQueryBuilderConfig) => {
         });
       },
 
-      dynamicSelectOne: (field, val, fs) => {
-        const rename: { [key: string]: keyof S } = {};
-        if (fs === undefined) {
-          fs = Object.keys(fields) as (keyof S)[];
-        }
-        for (const f of fs) {
-          rename[camelToSnakeCase(f as string)] = f;
+      dynamicInsertMany: (entities) => {
+        const insVals: { [key: string]: any }[] = [];
+        for (const e of entities) {
+          const ins: { [key: string]: any } = {};
+          for (const col in columns) {
+            const method = columns[col];
+            ins[camelToSnakeCase(col)] = (e[method] as any)();
+          }
+          insVals.push(ins);
         }
 
         return Object.freeze({
-          query: selQb.select(rename)
-            .where(camelToSnakeCase(field as string), '=', qb.raw(client === 'pg' ? '$1' : '?'))
+          query: qb.withSchema(schema)
+            .from(table)
+            .insert(insVals)
+            .returning(primaryKey)
+            .toQuery() + ';',
+        });
+      },
+
+      dynamicSelectOne: (col, val, cl) => {
+        const rename: { [key: string]: string } = {};
+        if (cl === undefined) {
+          cl = Object.keys(columns) as (keyof S)[];
+        }
+        for (const f of cl) {
+          rename[f as string] = camelToSnakeCase(f as string);
+        }
+
+        return Object.freeze({
+          query: qb.withSchema(schema)
+            .from(table)
+            .select(rename)
+            .where(camelToSnakeCase(col as string), '=', qb.raw(client === 'pg' ? '$1' : '?'))
             .limit(1)
             .toQuery() + ';',
           values: [ val ],
         });
       },
 
-      dynamicSelectAll: (fs) => {
-        const rename: { [key: string]: keyof S } = {};
-        if (fs === undefined) {
-          fs = Object.keys(fields) as (keyof S)[];
+      dynamicSelectAll: (cl, order) => {
+        const rename: { [key: string]: string } = {};
+        if (cl === undefined) {
+          cl = Object.keys(columns) as (keyof S)[];
         }
-        for (const f of fs) {
-          rename[camelToSnakeCase(f as string)] = f;
+        for (const f of cl) {
+          rename[f as string] = camelToSnakeCase(f as string);
+        }
+
+        let sqb = qb.withSchema(schema)
+          .from(table)
+          .select(rename);
+        if (order) {
+          for (const o in order) {
+            const name = camelToSnakeCase(o as string);
+            sqb = sqb.orderBy(name, order[o]);
+          }
         }
 
         return Object.freeze({
-          query: selQb.select(rename).toQuery() + ';',
+          query: sqb.toQuery() + ';',
         });
       },
 
-      dynamicSelectFilter: (filters, fs) => {
-        const rename: { [key: string]: keyof S } = {};
-        if (fs === undefined) {
-          fs = Object.keys(fields) as (keyof S)[];
+      dynamicSelectFilter: (filters, cl, order) => {
+        const rename: { [key: string]: string } = {};
+        if (cl === undefined) {
+          cl = Object.keys(columns) as (keyof S)[];
         }
-        for (const f of fs) {
-          rename[camelToSnakeCase(f as string)] = f;
+        for (const f of cl) {
+          rename[f as string] = camelToSnakeCase(f as string);
         }
 
-        let sqb = selQb.select(rename);
+        let sqb = qb.withSchema(schema)
+          .from(table)
+          .select(rename);
         let i = 0;
         const values: any[] = [];
         for (const {
-          field,
+          col,
           condition,
           value,
         } of filters) {
-          sqb = sqb.where(camelToSnakeCase(field as string), condition, qb.raw(`$${++i}`));
-          values.push(value);
+          const name = camelToSnakeCase(col as string);
+          if (condition === 'in') {
+            sqb = sqb.whereIn(name, value);
+          } else {
+            sqb = sqb.where(name, condition, qb.raw(`$${++i}`));
+            values.push(value);
+          }
+        }
+
+        if (order) {
+          for (const o in order) {
+            const name = camelToSnakeCase(o as string);
+            sqb = sqb.orderBy(name, order[o]);
+          }
         }
 
         return Object.freeze({
@@ -134,6 +181,7 @@ const buildMakeDynamicQuery = ({ client, }: DynamicQueryBuilderConfig) => {
         for (const method of methods) {
           values.push((entity[method] as any)());
         }
+        values.push((entity[primaryMethod!] as any)());
         return Object.freeze({
           query: upQuery,
           values,
