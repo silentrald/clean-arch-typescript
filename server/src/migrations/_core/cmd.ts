@@ -18,8 +18,8 @@ if (invalidCmd(cmd)) {
   process.exit(1);
 }
 
-import { makeDb } from 'db';
-import migrate from 'migrations';
+import { makeDb } from '@db/_core';
+import migrate from '@migrations/_core';
 
 (async () => {
   const db = makeDb();

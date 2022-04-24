@@ -1,9 +1,7 @@
 export interface Column {
   type: string;
   default?: string | number | boolean;
-  required?: boolean;
-  nullable?: boolean;
-  unique?: boolean;
+  nullable?: true;
   references?: {
     col: string;
     table: string;
@@ -48,10 +46,14 @@ export interface IntColumn extends NumberColumn {
 
 export interface FloatColumn extends NumberColumn {
   type: 'float';
+  precision?: number;
+  scale?: number;
 }
 
 export interface DecimalColumn extends NumberColumn {
   type: 'decimal';
+  precision?: number;
+  scale?: number;
 }
 
 export interface BooleanColumn extends Column {
@@ -82,6 +84,25 @@ export interface BinaryColumn extends Column {
   type: 'binary';
 }
 
+export interface ObjectColumn<S> extends Column {
+  type: 'object';
+  properties: {
+    [K in keyof Required<S>]
+    : S[K] extends string | null | undefined ?
+      StringColumn | UUIDColumn | EmailColumn | URIColumn |
+      DateColumn | TimeColumn | TimestampColumn | BinaryColumn
+    : S[K] extends number | null | undefined ?
+      SerialColumn | IntColumn | FloatColumn | DecimalColumn
+    : S[K] extends boolean | null | undefined ?
+      BooleanColumn
+    : S[K] extends any[] | null | undefined ?
+      ArrayColumn
+    : S[K] extends Record<any, any> | null | undefined ?
+      ObjectColumn<S[K]>
+    : never;
+  }
+}
+
 export type Columns<S> = {
   [K in keyof Required<S>]
     : S[K] extends string | null | undefined ?
@@ -93,10 +114,12 @@ export type Columns<S> = {
       BooleanColumn
     : S[K] extends any[] | null | undefined ?
       ArrayColumn
+    : S[K] extends Record<any, any> | null | undefined ?
+      ObjectColumn<S[K]>
     : never;
 }
 
-export interface ColumnConstraint<S> {
+export interface Constraint<S> {
   primary: {
     col: (keyof S);
     name?: string; // constraint name
@@ -109,4 +132,11 @@ export interface ColumnConstraint<S> {
 
 export interface ColumnToSchemaConfig {
   camelToSnakeCase: (str: string) => string;
+}
+
+export interface Table<S> {
+  name: string;
+  schema: string;
+  columns: Columns<S>;
+  constraints: Constraint<S>;
 }

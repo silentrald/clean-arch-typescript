@@ -2,7 +2,7 @@ import { camelToSnakeCase } from '@helpers/string';
 import knex from 'knex';
 import { DynamicMigrationConfig, DynamicMigrationBuilderConfig } from './types';
 
-const buildMakeDynamicMigration = ({ client, }: DynamicMigrationBuilderConfig) => {
+const buildMakeDynamicMigration = ({ client, defaults, }: DynamicMigrationBuilderConfig) => {
   const qb = knex({
     client,
     log: {
@@ -12,13 +12,39 @@ const buildMakeDynamicMigration = ({ client, }: DynamicMigrationBuilderConfig) =
     },
   });
 
+  const float = {
+    precision: 8,
+    scale: 2,
+  };
+
+  const decimal = {
+    precision: 12,
+    scale: 2,
+  };
+
+  if (defaults) {
+    if (defaults.float) {
+      float.precision = defaults.float.precision;
+      if (defaults.float.scale)
+        float.scale = defaults.float.scale;
+    }
+
+    if (defaults.decimal) {
+      decimal.precision = defaults.decimal.precision;
+      if (defaults.decimal.scale)
+        decimal.scale = defaults.decimal.scale;
+    }
+  }
+
   return <S> ({
-    columns,
-    table,
-    schema = 'public',
-    constraints,
+    table: {
+      name,
+      schema,
+      columns,
+      constraints,
+    },
   }: DynamicMigrationConfig<S>) => {
-    const up = qb.schema.withSchema(schema).createTableIfNotExists(table, (t) => {
+    const up = qb.schema.withSchema(schema).createTableIfNotExists(name, (t) => {
       for (const col in columns) {
         let tmp: any;
         const val = columns[col];
@@ -51,18 +77,18 @@ const buildMakeDynamicMigration = ({ client, }: DynamicMigrationBuilderConfig) =
           if (val.precision && val.scale) {
             tmp = t.float(name, val.precision, val.scale);
           } else if (val.precision) {
-            tmp = t.float(name, val.precision);
+            tmp = t.float(name, val.precision, float.scale);
           } else {
-            tmp = t.float(name, 6, 2); // TODO: Changeable
+            tmp = t.float(name, float.precision, float.scale);
           }
           break;
         case 'decimal':
           if (val.precision && val.scale) {
             tmp = t.decimal(name, val.precision, val.scale);
           } else if (val.precision) {
-            tmp = t.decimal(name, val.precision);
+            tmp = t.decimal(name, val.precision, decimal.scale);
           } else {
-            tmp = t.decimal(name, 12, 2); // TODO: Changeable
+            tmp = t.decimal(name, decimal.precision, decimal.scale);
           }
           break;
         case 'boolean':
@@ -88,10 +114,10 @@ const buildMakeDynamicMigration = ({ client, }: DynamicMigrationBuilderConfig) =
           tmp = t.binary(name);
           break;
         default:
-          throw new Error(`Invalid type: ${(val as any).type}`); // TODO: Proper error
+          throw new Error(`Invalid type: ${(val as any).type}`);
         }
 
-        if (val.nullable !== true) {
+        if (!val.nullable) {
           tmp = tmp.notNullable();
         }
 
@@ -102,10 +128,6 @@ const buildMakeDynamicMigration = ({ client, }: DynamicMigrationBuilderConfig) =
             tmp = val.default;
           }
         }
-
-        // if (val.unique) {
-        //   tmp = tmp.unique();
-        // }
 
         // Always last
         if (val.references) {
@@ -135,12 +157,12 @@ const buildMakeDynamicMigration = ({ client, }: DynamicMigrationBuilderConfig) =
       }
     }).toQuery() + ';';
 
-    const insQb = qb.withSchema(schema).from(table);
+    const insQb = qb.withSchema(schema).from(name);
 
-    const del = qb.withSchema(schema).from(table).del().toQuery() + ';';
+    const del = qb.withSchema(schema).from(name).del().toQuery() + ';';
 
     const down = qb.schema.withSchema(schema)
-      .dropTableIfExists(table)
+      .dropTableIfExists(name)
       .toQuery() + ';';
 
     return Object.freeze({

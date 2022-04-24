@@ -9,28 +9,28 @@ const makeUserList = ({ userDb, }: UserListConfig) => {
   };
 
   const getUserById = async (id: string) => {
-    const userSchema = await userDb.getById(id);
+    const s = await userDb.getById(id);
 
-    const user = makeUser(userSchema);
-    user.setPasswordToHash();
+    const user = makeUser(s);
+    user.passToHash();
 
     return user;
   };
 
   const getUserByUsername = async (username: string) => {
-    const userSchema = await userDb.getByUsername(username);
+    const s = await userDb.getByUsername(username);
 
-    const user = makeUser(userSchema);
-    user.setPasswordToHash();
+    const user = makeUser(s);
+    user.passToHash();
 
     return user;
   };
 
   const getUserByEmail = async (email: string) => {
-    const userSchema = await userDb.getByEmail(email);
+    const s = await userDb.getByEmail(email);
 
-    const user = makeUser(userSchema);
-    user.setPasswordToHash();
+    const user = makeUser(s);
+    user.passToHash();
 
     return user;
   };

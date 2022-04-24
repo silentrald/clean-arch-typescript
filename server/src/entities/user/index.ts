@@ -22,19 +22,19 @@ const sanitize = (user: UserSchema) => {
   return user;
 };
 
-const makeHash = (pass: string) => {
+const hash = (pass: string) => {
   return bcrypt.hashSync(pass, 8);
 };
 
-const compareHash = (pass: string, hash: string) => {
+const compare = (pass: string, hash: string) => {
   return bcrypt.compareSync(pass, hash);
 };
 
 const makeUser = buildMakeUser({
   validate,
   sanitize,
-  makeHash,
-  compareHash,
+  hash,
+  compare,
 });
 
 export default makeUser;

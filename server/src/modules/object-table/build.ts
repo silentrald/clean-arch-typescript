@@ -1,15 +1,17 @@
 import { JSONSchemaType } from 'ajv';
-import { Columns, ColumnToSchemaConfig } from './types';
+import {
+  Columns, ColumnToSchemaConfig, Table
+} from './types';
 
-const makeColumnsToSchema = ({ camelToSnakeCase, }: ColumnToSchemaConfig) => {
-  return <S> (columns: Columns<S>) => {
+const makeTableToSchema = ({ camelToSnakeCase, }: ColumnToSchemaConfig) => {
+  const columnsToSchema = <S> (columns: Columns<S>) => {
     const properties: { [key: string]: { [key: string]: any } } = {};
     const required: (keyof S)[] = [];
 
     for (const col in columns) {
       const val = columns[col];
 
-      if (val.required !== false)
+      if (!val.nullable)
         required.push(col);
 
       let property: { [key: string]: any } = {};
@@ -108,6 +110,9 @@ const makeColumnsToSchema = ({ camelToSnakeCase, }: ColumnToSchemaConfig) => {
           type: 'string',
         };
         break;
+      case 'object':
+        property = columnsToSchema(val.properties);
+        break;
       default:
         throw new Error('Invalid type');
       }
@@ -136,6 +141,12 @@ const makeColumnsToSchema = ({ camelToSnakeCase, }: ColumnToSchemaConfig) => {
 
     return schema as JSONSchemaType<S>;
   };
+
+  const tableToSchema = <S> (table: Table<S>) => {
+    return columnsToSchema(table.columns);
+  };
+
+  return tableToSchema;
 };
 
-export default makeColumnsToSchema;
+export default makeTableToSchema;

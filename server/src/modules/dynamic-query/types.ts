@@ -1,3 +1,4 @@
+import { Table } from '@modules/object-table/types';
 
 export interface Query {
   query: string;
@@ -41,8 +42,6 @@ export interface DynamicQueryBuilderConfig {
 }
 
 export interface DynamicQueryConfig<E, S> {
-  columns: { [K in keyof Partial<S>]: keyof E };
-  primary: keyof S;
-  table: string;
-  schema: string;
+  mapping: { [K in keyof Partial<S>]: keyof E };
+  table: Table<S>;
 }

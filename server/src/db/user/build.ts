@@ -1,4 +1,5 @@
 import { User, UserSchema } from '@entities/user/types';
+import makeDynamicQuery from '@modules/dynamic-query';
 import UserDbError from './error';
 import {
   UserDb, UserDbClient, UserDbConfig
@@ -6,13 +7,36 @@ import {
 
 // CRUD Functionalities
 const makeUserDb = ({
-  db, validate, dynamicQuery: {
-    dynamicSelectOne, dynamicInsert,
-    dynamicDelete, dynamicUpdate,
-  },
-  table, schema,
-}: UserDbConfig<User, UserSchema>): UserDb => {
-  const TABLE = `${schema}.${table}`;
+  db, validate, table,
+}: UserDbConfig<UserSchema>): UserDb => {
+  const TABLE = `${table.schema}.${table.name}`;
+
+  const {
+    dynamicSelectOne,
+    dynamicInsert,
+    dynamicDelete,
+  } = makeDynamicQuery<User, UserSchema>({
+    mapping: {
+      id: 'getId',
+      username: 'getUsername',
+      password: 'getHash',
+      email: 'getEmail',
+      fname: 'getFname',
+      lname: 'getLname',
+    },
+    table,
+  });
+
+  const { dynamicUpdate, } = makeDynamicQuery<User, UserSchema>({
+    mapping: {
+      id: 'getId',
+      username: 'getUsername',
+      email: 'getEmail',
+      fname: 'getFname',
+      lname: 'getLname',
+    },
+    table,
+  });
 
   const userDbClient: UserDbClient = {
     getById: async (client, id, columns) => {

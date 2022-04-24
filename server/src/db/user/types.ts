@@ -1,16 +1,16 @@
 import { User, UserSchema } from '@entities/user/types';
-import { DynamicQuery } from '@modules/dynamic-query/types';
 import {
   Db,
-  DbActionTransform, DbClient, EntityDbConfig
-} from '@db/types';
+  DbActionTransform, DbClient
+} from '@db/_core/types';
+import { Table } from '@modules/object-table/types';
 
-export interface UserDbConfig<E, S> extends EntityDbConfig {
+export interface UserDbConfig<S> {
   validate: {
     id: (id: string) => boolean;
   },
-  dynamicQuery: Partial<DynamicQuery<E, S>>;
   db: Db;
+  table: Table<S>;
 }
 
 export interface UserDbAction {

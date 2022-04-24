@@ -90,6 +90,7 @@
     "@middlewares": "dist/middlewares",
     "@modules": "dist/modules",
     "@use-cases": "dist/use-cases",
-    "@app": "dist/app"
+    "@app": "dist/app",
+    "@config": "dist/config"
   }
 }

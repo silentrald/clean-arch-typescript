@@ -1,4 +1,4 @@
-import { EntityError } from '@entities/error';
+import EntityError from '@entities/_core/error';
 
 class UserError extends EntityError {
   constructor(errors: string[]) {

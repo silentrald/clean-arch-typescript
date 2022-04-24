@@ -17,12 +17,6 @@ export interface DbClient {
   close: () => void;
 }
 
-export interface EntityDbConfig {
-  db: Db;
-  table: string;
-  schema: string;
-}
-
 export interface TransactionDb<T> {
   transaction: () => Partial<T>;
 }

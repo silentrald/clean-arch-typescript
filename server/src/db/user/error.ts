@@ -1,4 +1,4 @@
-import DbError from '@db/error';
+import DbError from '@db/_core/error';
 
 class UserDbError extends DbError {
   constructor(errors: string[]) {

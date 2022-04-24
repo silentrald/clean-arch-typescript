@@ -1,5 +1,5 @@
 // Responsible for setting up the database
-import userMigration from './user';
+import userMigration from '@migrations/table/user';
 
 const migrations = [ userMigration ];
 

@@ -7,7 +7,7 @@ import {
 } from './types';
 
 const buildMakeUser = ({
-  validate, sanitize, makeHash, compareHash,
+  validate, sanitize, hash, compare,
 }: BuildMakeUserConfig) => (
   user: UserSchema): User => {
   const errors = validate(user);
@@ -16,8 +16,8 @@ const buildMakeUser = ({
   }
 
   user = sanitize(user);
+  let hashString = '';
 
-  let hash = '';
   return Object.freeze({
     getId: () => user.id,
     getUsername: () => user.username,
@@ -27,39 +27,39 @@ const buildMakeUser = ({
     getLname: () => user.lname,
 
     getHash: () => {
-      if (hash) return hash;
+      if (hashString) return hashString;
 
       if (!user.password) {
         throw new UserError([ 'no_password' ]);
       }
 
-      hash = makeHash(user.password);
-      return hash;
+      hashString = hash(user.password);
+      return hashString;
     },
 
-    setPasswordToHash: () => {
-      if (hash) return;
+    passToHash: () => {
+      if (hashString) return;
 
       if (!user.password) {
         throw new UserError([ 'no_password' ]);
       }
 
-      hash = user.password;
+      hashString = user.password;
       user.password = undefined;
     },
 
     removePassword: () => {
       user.password = undefined;
-      hash = '';
+      hashString = '';
     },
 
     comparePassword: (pass: string) => {
-      if (!hash) {
+      if (!hashString) {
         // throw new UserError([ 'no_hash' ]);
         return false;
       }
 
-      return compareHash(pass, hash);
+      return compare(pass, hashString);
     },
   });
 };

@@ -1,4 +1,4 @@
-export class UseCaseError extends Error {
+class UseCaseError extends Error {
   readonly errors: string[] = [];
 
   constructor(errors: string[]) {
@@ -7,3 +7,5 @@ export class UseCaseError extends Error {
     this.errors = errors;
   }
 }
+
+export default UseCaseError;

@@ -1,4 +1,4 @@
-import { UseCaseError } from '@use-cases/error';
+import UseCaseError from '@use-cases/_core/error';
 
 class UserListError extends UseCaseError {
   constructor(errors: string[]) {

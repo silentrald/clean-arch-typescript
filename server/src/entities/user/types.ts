@@ -1,4 +1,4 @@
-import { Entity } from 'entities/types';
+import { Entity } from '@entities/_core/types';
 
 export interface UserSchema {
   id?: string;
@@ -11,7 +11,7 @@ export interface UserSchema {
 
 export interface User extends Entity<UserSchema> {
   getHash: () => string;
-  setPasswordToHash: () => void;
+  passToHash: () => void;
   removePassword: () => void;
   comparePassword: (pass: string) => boolean;
 }
@@ -19,6 +19,6 @@ export interface User extends Entity<UserSchema> {
 export interface BuildMakeUserConfig {
   validate: (user: UserSchema) => string[] | undefined;
   sanitize: (user: UserSchema) => UserSchema;
-  makeHash: (pass: string) => string;
-  compareHash: (pass: string, hash: string) => boolean;
+  hash: (pass: string) => string;
+  compare: (pass: string, hash: string) => boolean;
 }

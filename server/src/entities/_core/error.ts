@@ -1,4 +1,4 @@
-export class EntityError extends Error {
+class EntityError extends Error {
   readonly errors: string[] = [];
 
   constructor(errors: string[]) {
@@ -7,3 +7,5 @@ export class EntityError extends Error {
     this.errors = errors;
   }
 }
+
+export default EntityError;

@@ -50,9 +50,11 @@
       "@entities/*": ["entities/*"],
       "@helpers/*": ["helpers/*"],
       "@middlewares/*": ["middlewares/*"],
+      "@migrations/*": ["migrations/*"],
       "@modules/*": ["modules/*"],
       "@use-cases/*": ["use-cases/*"],
-      "@app": ["app"]
+      "@app": ["app"],
+      "@config": ["config"]
     } /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */,
     "rootDirs": [
       "./src"
@@ -87,6 +89,7 @@
     "migrations",
     "tsconfig.json",
     "*.config.js",
-    "yarn.lock"
+    "yarn.lock",
+    "jest.setup.ts"
   ]
 }
