@@ -23,9 +23,7 @@ export const userTable: Table<UserSchema> = {
       max: 60,
       nullable: true,
     },
-    email: {
-      type: 'email',
-    },
+    email: { type: 'email', },
     fname: {
       type: 'string',
       min: 1,

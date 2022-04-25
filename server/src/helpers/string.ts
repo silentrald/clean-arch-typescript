@@ -6,3 +6,9 @@ export const camelToSnakeCase = (str: string): string =>
 
 export const snakeToCamelCase = (str: string): string =>
   str.replace(/_[a-z]/g, letter => `${letter.charAt(1).toUpperCase()}`);
+
+export const generateTestString = (n: number): string => {
+  let str = '';
+  for (let i = 0; i < n; i++) str += 'a';
+  return str;
+};

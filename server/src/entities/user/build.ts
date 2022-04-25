@@ -9,7 +9,8 @@ import {
 const buildMakeUser = ({
   validate, sanitize, hash, compare,
 }: BuildMakeUserConfig) => (
-  user: UserSchema): User => {
+  user: UserSchema
+): User => {
   const errors = validate(user);
   if (errors) {
     throw new UserError(errors);
@@ -27,11 +28,8 @@ const buildMakeUser = ({
     getLname: () => user.lname,
 
     getHash: () => {
-      if (hashString) return hashString;
-
-      if (!user.password) {
-        throw new UserError([ 'no_password' ]);
-      }
+      if (hashString || !user.password)
+        return hashString;
 
       hashString = hash(user.password);
       return hashString;
