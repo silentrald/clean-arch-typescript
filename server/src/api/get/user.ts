@@ -1,12 +1,12 @@
-import isAuthMw from '@middlewares/auth/is-auth';
+import { adaptEndpoint } from '@modules/express-adapter';
+import { ARequest, AResponse } from '@modules/express-adapter/types';
 
-import { Request, Response } from 'express';
-import '@modules/session/types';
-
-const api = (req: Request, res: Response): Response | void => {
-  return res.status(200).send({
-    user: req.session!.user,
-  });
+const api = (req: ARequest): AResponse => {
+  return {
+    status: 200,
+    data: req.session.user,
+  };
 };
 
-export default [ isAuthMw, api ];
+const endpoint = adaptEndpoint([ api ]);
+export default endpoint;

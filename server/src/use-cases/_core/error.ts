@@ -3,8 +3,8 @@ class UseCaseError extends Error {
 
   constructor(errors: string[]) {
     super();
-
     this.errors = errors;
+    this.message = this.errors.join('; ');
   }
 }
 

@@ -16,24 +16,21 @@ module.exports = {
   plugins: [ '@typescript-eslint' ],
   rules: {
     'max-len': [ ERROR, {
-      code: 100,
+      code: 120,
+      ignoreStrings: true,
     } ],
     indent: [ ERROR, 2 ],
     quotes: [ ERROR, 'single' ],
     semi: [ ERROR, 'always' ],
     'array-bracket-spacing': [ ERROR, 'always' ],
-    'array-bracket-newline': [ ERROR, {
-      minItems: 3,
-    } ],
-    'array-element-newline': [ ERROR, {
-      minItems: 3,
-    } ],
+    'array-bracket-newline': [ ERROR, { minItems: 3, } ],
+    'array-element-newline': [ ERROR, { minItems: 3, } ],
     'object-property-newline': ERROR,
     'object-curly-spacing': [ ERROR, 'always' ],
     'object-curly-newline': [ 'error', {
       ObjectExpression: {
         multiline: true,
-        minProperties: 1,
+        minProperties: 2,
       },
       ObjectPattern: {
         multiline: true,

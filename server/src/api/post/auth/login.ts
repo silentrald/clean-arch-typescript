@@ -1,25 +1,25 @@
 import logger from '@modules/logger';
+import { adaptEndpoint } from '@modules/express-adapter';
 
 import userList from '@use-cases/user-list';
 
 import notAuthMw from '@middlewares/auth/not-auth';
 
-import { Request, Response } from 'express';
-import '@modules/session/types';
+import { ARequest, AResponse } from '@modules/express-adapter/types';
 
-import DbError from '@db/_core/error';
-import EntityError from '@entities/_core/error';
-import UseCaseError from '@use-cases/_core/error';
+import { isApplicationError } from '@helpers/error';
 
-
-const api = async (req: Request, res: Response): Promise<Response | void> => {
+const api = async (req: ARequest): Promise<AResponse> => {
   const { username, password, } = req.body;
 
   try {
     const user = await userList.getUserByUsername(username);
     const same = user.comparePassword(password);
     if (!same) {
-      return res.status(401).send('Auth Failed');
+      return {
+        status: 401,
+        data: 'Auth Failed',
+      };
     }
 
     req.session.user = {
@@ -30,16 +30,19 @@ const api = async (req: Request, res: Response): Promise<Response | void> => {
       lname: user.getLname(),
     };
 
-    return res.status(204).send({});
+    return { status: 204, };
   } catch (err) {
-    logger.error(err);
-
-    if (err instanceof EntityError || err instanceof DbError || err instanceof UseCaseError) {
-      return res.status(401).send('Auth Failed');
+    logger.error(err); // Log this to check for invalid login
+    if (isApplicationError(err)) {
+      return {
+        status: 401,
+        data: 'Auth Failed',
+      };
     }
 
-    return res.status(500).send({});
+    return { status: 500, };
   }
 };
 
-export default [ notAuthMw, api ];
+const endpoint = adaptEndpoint([ notAuthMw, api ]);
+export default endpoint;

@@ -7,10 +7,12 @@ const EXPIRES = 1000 * 60 * 20; // 20 Minutes
 
 const RedisStore = connectRedis(session);
 
+export const store = new RedisStore({
+  client: redis,
+});
+
 const SESSION_OPT: SessionOptions = {
-  store: new RedisStore({
-    client: redis,
-  }),
+  store,
   secret: process.env.SESSION_SECRET || 'super-secret-session',
   resave: false,
   saveUninitialized: false,

@@ -1,14 +1,12 @@
-import {
-  Request, Response, NextFunction
-} from 'express';
-import '@modules/session/types';
+import { ARequest, AResponse } from '@modules/express-adapter/types';
 
-const isAuthMw = (req: Request, res: Response, next: NextFunction): Response | void => {
+const isAuthMw = (req: ARequest): AResponse | void => {
   if (!req.session || !req.session.user) {
-    return res.status(403).send();
+    return {
+      status: 403,
+      data: 'Forbidden',
+    };
   }
-
-  next();
 };
 
 export default isAuthMw;
