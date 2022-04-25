@@ -1,18 +1,14 @@
 import { runCLI } from 'jest';
-require('dotenv').config({
-  path: './.env.test',
-});
+require('dotenv').config({ path: './.env.test', });
 
 import chokidar from 'chokidar';
 import path from 'path';
 import fs from 'fs';
 
-import migrate from 'migrations';
-import { makeDb } from 'db';
+import migrate from './src/migrations/_core';
+import { makeDb } from './src/db/_core';
 
-const watch = chokidar.watch(path.join(__dirname, 'uploads', 'ids'), {
-  persistent: true,
-});
+const watch = chokidar.watch(path.join(__dirname, 'uploads', 'ids'), { persistent: true, });
 
 (async () => {
   const queryUp = migrate('up');

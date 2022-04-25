@@ -13,7 +13,5 @@ module.exports = {
     '@app': '<rootDir>/src/app',
     '@config': '<rootDir>/src/config',
   },
-  transform: {
-    '^.+\\.tsx?$': 'ts-jest',
-  },
+  transform: { '^.+\\.tsx?$': 'ts-jest', },
 };
