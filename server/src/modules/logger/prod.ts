@@ -8,14 +8,10 @@ const {
 const logger = (): Logger => createLogger({
   format: combine(
     timestamp(),
-    errors({
-      stack: true,
-    }),
+    errors({ stack: true, }),
     json()
   ),
-  defaultMeta: {
-    service: 'user-service',
-  },
+  defaultMeta: { service: 'server', },
   transports: [
     new transports.Console(),
     new transports.File({
@@ -25,9 +21,6 @@ const logger = (): Logger => createLogger({
     new transports.File({
       filename: 'logs/http.log',
       level: 'http',
-    }),
-    new transports.File({
-      filename: 'logs/combined.log',
     })
   ],
 });

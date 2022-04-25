@@ -6,9 +6,7 @@ import {
 } from './types';
 
 const buildMakeDynamicQuery = ({ client, }: DynamicQueryBuilderConfig) => {
-  const qb = knex({
-    client,
-  });
+  const qb = knex({ client, });
 
   return <E, S> ({
     mapping,
@@ -133,9 +131,7 @@ const buildMakeDynamicQuery = ({ client, }: DynamicQueryBuilderConfig) => {
           }
         }
 
-        return Object.freeze({
-          query: sqb.toQuery() + ';',
-        });
+        return Object.freeze({ query: sqb.toQuery() + ';', });
       },
 
       dynamicSelectFilter: (filters, cl, order) => {

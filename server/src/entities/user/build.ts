@@ -55,7 +55,6 @@ const buildMakeUser = ({
 
     comparePassword: (pass: string) => {
       if (!hashString) {
-        // throw new UserError([ 'no_hash' ]);
         return false;
       }
 

@@ -4,9 +4,9 @@ import path from 'path';
 const getFiles = (dir: string): string[] => {
   const files: string[] = [];
 
-  const dirents = fs.readdirSync(dir, { withFileTypes: true });
+  const dirents = fs.readdirSync(dir, { withFileTypes: true, });
   for (const dirent of dirents) {
-    const { name } = dirent;
+    const { name, } = dirent;
     if (dirent.isDirectory()) {
       const temp = getFiles(path.join(dir, name));
       if (temp.length > 0) {

@@ -3,9 +3,7 @@ import {
 } from 'ajv';
 
 import Ajv from 'ajv';
-const ajv = new Ajv({
-  allErrors: true,
-});
+const ajv = new Ajv({ allErrors: true, });
 require('ajv-formats')(ajv);
 require('ajv-errors')(ajv);
 

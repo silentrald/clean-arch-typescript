@@ -1,7 +1,5 @@
 import buildMakeDynamicQuery from './build';
 
-const makeDynamicQuery = buildMakeDynamicQuery({
-  client: 'pg',
-});
+const makeDynamicQuery = buildMakeDynamicQuery({ client: 'pg', });
 
 export default makeDynamicQuery;

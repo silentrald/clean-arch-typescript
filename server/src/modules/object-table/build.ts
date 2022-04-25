@@ -18,9 +18,7 @@ const makeTableToSchema = ({ camelToSnakeCase, }: ColumnToSchemaConfig) => {
 
       switch (val.type) {
       case 'string':
-        property = {
-          type: 'string',
-        };
+        property = { type: 'string', };
         if (val.min)
           property.minLength = val.min;
         if (val.max)
@@ -47,14 +45,10 @@ const makeTableToSchema = ({ camelToSnakeCase, }: ColumnToSchemaConfig) => {
         };
         break;
       case 'serial':
-        property = {
-          type: 'integer',
-        };
+        property = { type: 'integer', };
         break;
       case 'int':
-        property = {
-          type: 'integer',
-        };
+        property = { type: 'integer', };
         if (val.min)
           property.minimum = val.min;
         if (val.max)
@@ -62,18 +56,14 @@ const makeTableToSchema = ({ camelToSnakeCase, }: ColumnToSchemaConfig) => {
         break;
       case 'float':
       case 'decimal':
-        property = {
-          type: 'number',
-        };
+        property = { type: 'number', };
         if (val.min)
           property.minimum = val.min;
         if (val.max)
           property.maximum = val.max;
         break;
       case 'boolean':
-        property = {
-          type: 'boolean',
-        };
+        property = { type: 'boolean', };
         break;
       case 'date':
         property = {
@@ -96,9 +86,7 @@ const makeTableToSchema = ({ camelToSnakeCase, }: ColumnToSchemaConfig) => {
       case 'array':
         property = {
           type: 'array',
-          items: {
-            type: val.itemType,
-          },
+          items: { type: val.itemType, },
         };
         if (val.min)
           property.minItems = val.min;
@@ -106,9 +94,7 @@ const makeTableToSchema = ({ camelToSnakeCase, }: ColumnToSchemaConfig) => {
           property.maxItems = val.max;
         break;
       case 'binary':
-        property = {
-          type: 'string',
-        };
+        property = { type: 'string', };
         break;
       case 'object':
         property = columnsToSchema(val.properties);
@@ -134,9 +120,7 @@ const makeTableToSchema = ({ camelToSnakeCase, }: ColumnToSchemaConfig) => {
       properties,
       required,
       additionalProperties: false,
-      errorMessage: {
-        required: requiredErrors,
-      },
+      errorMessage: { required: requiredErrors, },
     };
 
     return schema as JSONSchemaType<S>;

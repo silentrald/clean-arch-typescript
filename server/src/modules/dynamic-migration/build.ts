@@ -66,9 +66,7 @@ const buildMakeDynamicMigration = ({ client, defaults, }: DynamicMigrationBuilde
           tmp = t.string(name, val.max);
           break;
         case 'serial':
-          tmp = t.increments(name, {
-            primaryKey: false,
-          });
+          tmp = t.increments(name, { primaryKey: false, });
           break;
         case 'int':
           tmp = t.integer(name);
@@ -101,9 +99,7 @@ const buildMakeDynamicMigration = ({ client, defaults, }: DynamicMigrationBuilde
           tmp = t.time(name);
           break;
         case 'timestamp':
-          tmp = t.timestamp(name, {
-            useTz: true,
-          });
+          tmp = t.timestamp(name, { useTz: true, });
           break;
         case 'array':
           if (val.data !== 'string')
@@ -143,16 +139,12 @@ const buildMakeDynamicMigration = ({ client, defaults, }: DynamicMigrationBuilde
 
       const { primary, unique, } = constraints;
       if (primary) {
-        t.primary([ primary.col as string ], {
-          constraintName: primary.name,
-        });
+        t.primary([ primary.col as string ], { constraintName: primary.name, });
       }
 
       if (unique) {
         for (const { columns, name, } of unique) {
-          t.unique((columns as string[]).map((c) => camelToSnakeCase(c)), {
-            indexName: name,
-          });
+          t.unique((columns as string[]).map((c) => camelToSnakeCase(c)), { indexName: name, });
         }
       }
     }).toQuery() + ';';

@@ -1,8 +1,14 @@
 import path from 'path';
+import {
+  isDev, isProd, isTest
+} from '@config';
 
-if (process.env.NODE_ENV === 'test') {
+if (isTest) {
   require('dotenv').config({
-    path: path.join(path.dirname(__dirname), '.env.test'),
+    path: path.join(
+      path.dirname(__dirname),
+      '.env.test'
+    ),
   });
 } else {
   require('dotenv').config();
@@ -21,7 +27,7 @@ import cors from 'cors';
 import session from 'express-session';
 import logger from '@modules/logger';
 
-import getFiles from './helpers/getFiles';
+import getFiles from './helpers/files';
 
 // CONSTANTS
 import SESSION_OPT from '@modules/session';
@@ -32,9 +38,8 @@ const HOST = process.env.HOST || 'localhost';
 const PORT = +(process.env.PORT || 5000);
 
 // MIDDLEWARES
-app.use(require('morgan')(process.env.NODE_ENV === 'development' ? 'dev' : 'combined', {
+app.use(require('morgan')(isDev ? 'dev' : 'combined', {
   stream: {
-    // write: (message: string, _encoding: string) => {
     write: (message: string) => {
       logger.http(message);
     },
@@ -46,19 +51,15 @@ app.use(cors({
   credentials: true,
 }));
 
-if (process.env.NODE_ENV === 'production') {
+if (isProd) {
   app.set('trust proxy', 1);
 }
 app.use(session(SESSION_OPT));
-app.use(bodyParser.urlencoded({
-  extended: false,
-}));
+app.use(bodyParser.urlencoded({ extended: false, }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-app.use(csrf({
-  cookie: true,
-}));
+app.use(csrf({ cookie: true, }));
 
 // APIS
 for (const method of [ 'get', 'post' ]) {

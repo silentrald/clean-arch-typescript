@@ -30,9 +30,7 @@ const constructResponse = (areq: AResponse, res: Response): void => {
   if (data) {
     res.send(data);
   } else if (errors) {
-    res.send({
-      errors,
-    });
+    res.send({ errors, });
   } else {
     res.send();
   }
