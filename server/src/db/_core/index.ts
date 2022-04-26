@@ -9,9 +9,13 @@ const config: PoolConfig = {
   host: process.env.POSTGRES_HOST || 'localhost',
   port: +(process.env.POSTGRES_PORT || 5432),
   database: process.env.POSTGRES_DB || 'sample_db',
+
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
 };
 
-const db = new Pool(config);
+export const db = new Pool(config);
 
 const makeDbClient = (client: PoolClient): DbClient => {
   return Object.freeze({
@@ -32,7 +36,7 @@ const makeDbClient = (client: PoolClient): DbClient => {
       };
     },
     close: () => {
-      client.release();
+      client.release(true);
     },
   });
 };
@@ -56,4 +60,25 @@ export const makeDb = (): Db => {
       await db.end();
     },
   });
+};
+
+export const makeTransactionWrapper = (db: Db) => {
+  return async <T extends (...args: any[]) => any>(
+    func: T,
+    ...args: any[]
+  ): Promise<Awaited<ReturnType<T>>> => {
+    let ret: any;
+    const client = await db.transaction();
+    try {
+      await client.begin();
+      ret = await func(client, ...args);
+      await client.begin();
+    } catch (err) {
+      await client.rollback();
+      throw err;
+    } finally {
+      client.close();
+    }
+    return ret;
+  };
 };

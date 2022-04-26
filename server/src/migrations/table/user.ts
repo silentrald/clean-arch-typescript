@@ -6,9 +6,17 @@ const {
   makeUp, makeIns, makeDel, makeDown,
 } = makeDynamicMigration<UserSchema>({ table: userTable, });
 
+const users: UserSchema[] = [ {
+  username: 'username',
+  password: 'password',
+  email: 'sample@example.com',
+  fname: 'sample',
+  lname: 'sample',
+} ];
+
 const userMigration = {
   up: makeUp(),
-  ins: makeIns(),
+  ins: makeIns(users),
   del: makeDel(),
   down: makeDown(),
 };

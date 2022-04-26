@@ -14,7 +14,7 @@ if (isTest) {
   require('dotenv').config();
 }
 
-if (process.env.NODE_ENV === 'production')
+if (isProd)
   require('module-alias/register');
 
 // MODULES
@@ -62,7 +62,9 @@ app.use(cookieParser());
 app.use(csrf({ cookie: true, }));
 
 // APIS
-for (const method of [ 'get', 'post' ]) {
+for (const method of [
+  'get', 'post'
+]) {
   for (const file of getFiles(
     path.join(__dirname, 'api', method)).map(file => `/${file.slice(0, -3)}`)
   ) {

@@ -1,9 +1,29 @@
 import {
   transports, format, createLogger, Logger
 } from 'winston';
+import 'winston-daily-rotate-file';
+
 const {
   combine, timestamp, errors, json,
 } = format;
+
+const errorTransport = new transports.DailyRotateFile({
+  filename: 'logs/error-%DATE%.log',
+  datePattern: 'YYYY-MM-DD',
+  zippedArchive: true,
+  // maxSize: ''
+  maxFiles: '3d',
+  level: 'error',
+});
+
+const httpTransport = new transports.DailyRotateFile({
+  filename: 'logs/http-%DATE%.log',
+  datePattern: 'YYYY-MM-DD',
+  zippedArchive: true,
+  // maxSize: ''
+  maxFiles: '3d',
+  level: 'http',
+});
 
 const logger = (): Logger => createLogger({
   format: combine(
@@ -13,15 +33,7 @@ const logger = (): Logger => createLogger({
   ),
   defaultMeta: { service: 'server', },
   transports: [
-    new transports.Console(),
-    new transports.File({
-      filename: 'logs/error.log',
-      level: 'error',
-    }),
-    new transports.File({
-      filename: 'logs/http.log',
-      level: 'http',
-    })
+    errorTransport, httpTransport
   ],
 });
 

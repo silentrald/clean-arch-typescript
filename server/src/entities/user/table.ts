@@ -11,6 +11,7 @@ export const userTable: Table<UserSchema> = {
     id: {
       type: 'uuid',
       nullable: true,
+      default: true,
     },
     username: {
       type: 'string',

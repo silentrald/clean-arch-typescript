@@ -43,7 +43,7 @@ const makeUserList = ({ userDb, }: UserListConfig) => {
     return await userDb.updatePassword(user);
   };
 
-  const delUserById = async (id: string) => {
+  const removeUserById = async (id: string) => {
     return await userDb.del(id);
   };
 
@@ -54,7 +54,7 @@ const makeUserList = ({ userDb, }: UserListConfig) => {
     getUserByEmail,
     updateUser,
     updateUserPassword,
-    delUserById,
+    removeUserById,
   });
 };
 
