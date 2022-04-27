@@ -25,6 +25,7 @@ import cookieParser from 'cookie-parser';
 import csrf from 'csurf';
 import cors from 'cors';
 import session from 'express-session';
+import helmet from 'helmet';
 import logger from '@modules/logger';
 
 import getFiles from './helpers/files';
@@ -50,6 +51,7 @@ app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:3000',
   credentials: true,
 }));
+app.use(helmet());
 
 if (isProd) {
   app.set('trust proxy', 1);

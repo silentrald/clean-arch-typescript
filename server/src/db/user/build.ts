@@ -1,3 +1,4 @@
+import { makeDbAdapter } from '@db/_core';
 import { User, UserSchema } from '@entities/user/types';
 import makeDynamicQuery from '@modules/dynamic-query';
 import UserDbError from './error';
@@ -91,7 +92,9 @@ const makeUserDb = ({
         UPDATE  ${TABLE}
         SET     password=$1
         WHERE   id=$2;
-      `, [ user.getHash(), user.getId() ]);
+      `, [
+        user.getHash(), user.getId()
+      ]);
 
       return count === 1;
     },
@@ -103,24 +106,8 @@ const makeUserDb = ({
     },
   };
 
-  return Object.freeze({
-    getById: (id, columns) => userDbClient.getById(db, id, columns),
-    getByUsername: (username, columns) => userDbClient.getById(db, username, columns),
-    getByEmail: (email, columns) => userDbClient.getById(db, email, columns),
-    add: (user) => userDbClient.add(db, user),
-    updateWithoutPassword: (user) => userDbClient.updateWithoutPassword(db, user),
-    updatePassword: (user) => userDbClient.updatePassword(db, user),
-    del: (id) => userDbClient.del(db, id),
-
-    transaction: (client) => {
-      return Object.freeze({
-        add: (user) => userDbClient.add(client, user),
-        updateWithoutPassword: (user) => userDbClient.updateWithoutPassword(client, user),
-        updatePassword: (user) => userDbClient.updateWithoutPassword(client, user),
-        del: (id) => userDbClient.del(client, id),
-      });
-    },
-  });
+  const userDb = makeDbAdapter(db, userDbClient);
+  return Object.freeze(userDb);
 };
 
 export default makeUserDb;

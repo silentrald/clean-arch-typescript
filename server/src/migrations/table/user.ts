@@ -8,7 +8,7 @@ const {
 
 const users: UserSchema[] = [ {
   username: 'username',
-  password: 'password',
+  password: '$2b$08$sBL5y.wnGa5FsUMp3TKGgetzHAfx2o6AqMbvJRWD7e/Sqoxp3qT5K',
   email: 'sample@example.com',
   fname: 'sample',
   lname: 'sample',

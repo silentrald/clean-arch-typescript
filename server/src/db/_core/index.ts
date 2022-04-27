@@ -1,7 +1,9 @@
 import {
   Pool, PoolClient, PoolConfig
 } from 'pg';
-import { Db, DbClient } from './types';
+import {
+  Db, DbActionTransform, DbClient, TransactionDb
+} from './types';
 
 const config: PoolConfig = {
   user: process.env.POSTGRES_USER || 'sample_user',
@@ -81,4 +83,29 @@ export const makeTransactionWrapper = (db: Db) => {
     }
     return ret;
   };
+};
+
+export const makeDbAdapter = <T>(dbLocal: Db, dbClient: DbActionTransform<T>, trx?: (keyof T)[]): TransactionDb<T> => {
+  const unitDb = {} as any;
+  if (!trx) {
+    trx = [];
+  }
+
+  const trxWrapper = makeTransactionWrapper(dbLocal);
+
+  for (const key in dbClient) {
+    if (trx.findIndex((i) => i === key) > -1) {
+      unitDb[key] = (...args: any) => trxWrapper(dbClient[key], ...args);
+    } else {
+      unitDb[key] = (...args: any) => dbClient[key](dbLocal, ...args);
+    }
+  }
+  unitDb.transaction = (client) => {
+    const trx = {} as any;
+    for (const key in dbClient) {
+      trx[key] = (...args: any) => dbClient[key](client, ...args);
+    }
+    return Object.freeze(trx);
+  };
+  return unitDb as TransactionDb<T>;
 };

@@ -44,5 +44,7 @@ const api = async (req: ARequest): Promise<AResponse> => {
   }
 };
 
-const endpoint = adaptEndpoint([ notAuthMw, api ]);
+const endpoint = adaptEndpoint([
+  notAuthMw, api
+]);
 export default endpoint;

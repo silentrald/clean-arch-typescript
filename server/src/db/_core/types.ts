@@ -17,12 +17,13 @@ export interface DbClient {
   close: () => void;
 }
 
-export interface TransactionDb<T> {
-  transaction: () => Partial<T>;
-}
-
 export type DbActionTransform<T> = {
   [K in keyof T]: T[K] extends (...args: any[]) => any
     ? (db: Db | DbClient, ...args: Parameters<T[K]>) => ReturnType<T[K]>
     : never;
+}
+
+export interface TransactionDb<T> {
+  T;
+  transaction: () => T;
 }

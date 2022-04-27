@@ -1,7 +1,7 @@
 import { User, UserSchema } from '@entities/user/types';
 import {
   Db,
-  DbActionTransform, DbClient
+  DbActionTransform, DbClient, TransactionDb
 } from '@db/_core/types';
 import { Table } from '@modules/object-table/types';
 
@@ -25,6 +25,4 @@ export interface UserDbAction {
 
 export type UserDbClient = DbActionTransform<UserDbAction>;
 
-export interface UserDb extends UserDbAction {
-  transaction: (client: DbClient) => Partial<UserDbAction>;
-}
+export type UserDb = TransactionDb<UserDbAction>;
