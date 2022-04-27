@@ -8,7 +8,9 @@ module.exports = {
     jest: true,
   },
   extends: [
-    'eslint:recommended', 'plugin:@typescript-eslint/recommended'
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:security/recommended'
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {

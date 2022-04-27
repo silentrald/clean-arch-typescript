@@ -5,6 +5,7 @@ import {
   DynamicQuery, DynamicQueryBuilderConfig, DynamicQueryConfig
 } from './types';
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const buildMakeDynamicQuery = ({ client, }: DynamicQueryBuilderConfig) => {
   const qb = knex({ client, });
 

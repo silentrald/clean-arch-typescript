@@ -19,3 +19,10 @@ export interface DynamicMigrationBuilderConfig {
 export interface DynamicMigrationConfig<S> {
   table: Table<S>;
 }
+
+export interface DynamicMigration<S> {
+  makeUp: () => string;
+  makeIns: (data?: S[]) => string;
+  makeDel: () => string;
+  makeDown: () => string;
+}

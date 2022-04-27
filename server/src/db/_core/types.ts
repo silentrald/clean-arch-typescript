@@ -23,7 +23,4 @@ export type DbActionTransform<T> = {
     : never;
 }
 
-export interface TransactionDb<T> {
-  T;
-  transaction: () => T;
-}
+export type TransactionDb<T> = T & { transaction: () => T }

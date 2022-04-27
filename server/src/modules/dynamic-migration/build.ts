@@ -1,7 +1,10 @@
 import { camelToSnakeCase } from '@helpers/string';
 import knex from 'knex';
-import { DynamicMigrationConfig, DynamicMigrationBuilderConfig } from './types';
+import {
+  DynamicMigrationConfig, DynamicMigrationBuilderConfig, DynamicMigration
+} from './types';
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const buildMakeDynamicMigration = ({ client, defaults, }: DynamicMigrationBuilderConfig) => {
   const qb = knex({
     client,
@@ -43,7 +46,7 @@ const buildMakeDynamicMigration = ({ client, defaults, }: DynamicMigrationBuilde
       columns,
       constraints,
     },
-  }: DynamicMigrationConfig<S>) => {
+  }: DynamicMigrationConfig<S>): DynamicMigration<S> => {
     const up = qb.schema.withSchema(schema).createTableIfNotExists(name, (t) => {
       for (const col in columns) {
         let tmp: any;

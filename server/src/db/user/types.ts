@@ -1,7 +1,7 @@
 import { User, UserSchema } from '@entities/user/types';
 import {
   Db,
-  DbActionTransform, DbClient, TransactionDb
+  DbActionTransform, TransactionDb
 } from '@db/_core/types';
 import { Table } from '@modules/object-table/types';
 
