@@ -10,7 +10,7 @@ export interface UserList {
   getUserById: (id: string) => Promise<User>;
   getUserByUsername: (username: string) => Promise<User>;
   getUserByEmail: (email: string) => Promise<User>;
-  updateUser: (user: User) => Promise<boolean>;
-  updateUserPassword: (user: User) => Promise<boolean>;
+  updateUserInfoById: (user: User) => Promise<boolean>;
+  updateUserPasswordById: (id: string, password: string) => Promise<boolean>;
   removeUserById: (id: string) => Promise<boolean>;
 }

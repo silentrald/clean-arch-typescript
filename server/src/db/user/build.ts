@@ -40,6 +40,17 @@ const makeUserDb = ({
   });
 
   const userDbClient: UserDbClient = {
+    add: async (client, user) => {
+      if (user.getPassword() === undefined && user.getHash() === undefined) {
+        throw new UserDbError([ 'invalid_password' ]);
+      }
+
+      const { query, values, } = dynamicInsert!(user);
+      const { rows, } = await client.query<UserSchema>(query, values);
+
+      return rows[0].id!;
+    },
+
     getById: async (client, id, columns) => {
       const { query, values, } = dynamicSelectOne!('id', id, columns);
       const { rows, } = await client.query<UserSchema>(query, values);
@@ -61,18 +72,7 @@ const makeUserDb = ({
       return rows[0];
     },
 
-    add: async (client, user) => {
-      if (user.getPassword() === undefined && user.getHash() === undefined) {
-        throw new UserDbError([ 'invalid_password' ]);
-      }
-
-      const { query, values, } = dynamicInsert!(user);
-      const { rows, } = await client.query<UserSchema>(query, values);
-
-      return rows[0].id!;
-    },
-
-    updateWithoutPassword: async (client, user) => {
+    updateInfo: async (client, user) => {
       const { query, values, } = dynamicUpdate!(user);
       const { count, } = await client.query<UserSchema>(query, values);
       return count === 1;
@@ -83,8 +83,8 @@ const makeUserDb = ({
         throw new UserDbError([ 'invalid_id' ]);
       }
 
-      if (user.getPassword() === undefined && user.getHash() === undefined) {
-        throw new UserDbError([ 'invalid_password' ]);
+      if (!user.getHash()) {
+        throw new UserDbError([ 'invalid_hash' ]);
       }
 
       // Only supports psql

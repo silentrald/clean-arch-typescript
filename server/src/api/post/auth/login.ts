@@ -14,7 +14,7 @@ const api = async (req: ARequest): Promise<AResponse> => {
 
   try {
     const user = await userList.getUserByUsername(username);
-    const same = user.comparePassword(password);
+    const same = await user.comparePassword(password);
     if (!same) {
       return {
         status: 401,

@@ -1,14 +1,16 @@
 *.DS_Store
-
-# Log files
-logs
-*.log
-
 node_modules
+
+# api keys
 .env
 
-# Build
+# log files
+*.log
+logs
+
+# Build files
 dist
+src/test.ts
 
 # Tests
 coverage

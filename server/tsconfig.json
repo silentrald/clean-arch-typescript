@@ -86,7 +86,6 @@
   "exclude": [
     "dist",
     "node_modules",
-    "migrations",
     "tsconfig.json",
     "*.config.js",
     "yarn.lock",

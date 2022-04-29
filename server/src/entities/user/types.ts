@@ -13,12 +13,14 @@ export interface User extends Entity<UserSchema> {
   getHash: () => string;
   passToHash: () => void;
   removePassword: () => void;
-  comparePassword: (pass: string) => boolean;
+
+  hashPassword: () => Promise<void>;
+  comparePassword: (pass: string) => Promise<boolean>;
 }
 
 export interface BuildMakeUserConfig {
   validate: (user: UserSchema) => string[] | undefined;
   sanitize: (user: UserSchema) => UserSchema;
-  hash: (pass: string) => string;
-  compare: (pass: string, hash: string) => boolean;
+  hash: (pass: string) => Promise<string>;
+  compare: (pass: string, hash: string) => Promise<boolean>;
 }

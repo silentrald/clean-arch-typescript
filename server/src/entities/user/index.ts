@@ -23,11 +23,11 @@ const sanitize = (user: UserSchema) => {
 };
 
 const hash = (pass: string) => {
-  return bcrypt.hashSync(pass, 8);
+  return bcrypt.hash(pass, 8);
 };
 
 const compare = (pass: string, hash: string) => {
-  return bcrypt.compareSync(pass, hash);
+  return bcrypt.compare(pass, hash);
 };
 
 const makeUser = buildMakeUser({

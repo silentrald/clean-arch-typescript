@@ -7,6 +7,7 @@ const makeUserList = ({ userDb, }: UserListConfig) => {
 
   const userList: UserList = {
     addUser: async (user: User) => {
+      await user.hashPassword();
       await userDb.add(user);
     },
 
@@ -37,11 +38,20 @@ const makeUserList = ({ userDb, }: UserListConfig) => {
       return user;
     },
 
-    updateUser: async (user: User) => {
-      return await userDb.updateWithoutPassword(user);
+    updateUserInfoById: async (user: User) => {
+      return await userDb.updateInfo(user);
     },
 
-    updateUserPassword: async (user: User) => {
+    updateUserPasswordById: async (id: string, password: string) => {
+      const user = makeUser({
+        id,
+        username: 'username',
+        password,
+        fname: 's',
+        lname: 's',
+        email: 'none@example.com',
+      });
+      await user.hashPassword();
       return await userDb.updatePassword(user);
     },
 

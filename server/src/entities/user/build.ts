@@ -27,13 +27,7 @@ const buildMakeUser = ({
     getFname: () => user.fname,
     getLname: () => user.lname,
 
-    getHash: () => {
-      if (hashString || !user.password)
-        return hashString;
-
-      hashString = hash(user.password);
-      return hashString;
-    },
+    getHash: () => hashString,
 
     passToHash: () => {
       if (hashString) return;
@@ -51,12 +45,21 @@ const buildMakeUser = ({
       hashString = '';
     },
 
-    comparePassword: (pass: string) => {
+    hashPassword: async () => {
+      if (!user.password) {
+        throw new UserError([ 'no_password' ]);
+      }
+
+      hashString = await hash(user.password);
+      user.password = undefined;
+    },
+
+    comparePassword: async (pass: string) => {
       if (!hashString) {
         return false;
       }
 
-      return compare(pass, hashString);
+      return await compare(pass, hashString);
     },
   });
 };

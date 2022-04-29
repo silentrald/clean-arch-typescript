@@ -18,7 +18,7 @@ export interface UserDbAction {
   getByUsername: (username: string, columns?: (keyof UserSchema)[]) => Promise<UserSchema>;
   getByEmail: (email: string, columns?: (keyof UserSchema)[]) => Promise<UserSchema>;
   add: (user: User) => Promise<string>;
-  updateWithoutPassword: (user: User) => Promise<boolean>;
+  updateInfo: (user: User) => Promise<boolean>;
   updatePassword: (user: User) => Promise<boolean>;
   del: (id: string) => Promise<boolean>;
 }
