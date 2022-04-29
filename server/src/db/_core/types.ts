@@ -5,16 +5,12 @@ export interface QueryResult<T> {
 
 export interface Db {
   query: <T>(query: string, values?: any[]) => Promise<QueryResult<T>>;
-  transaction: () => Promise<DbClient>;
+  transaction: (cb: (client: DbClient) => Promise<void>) => Promise<void>;
   close: () => Promise<void>;
 }
 
 export interface DbClient {
-  begin: () => Promise<void>;
-  commit: () => Promise<void>;
-  rollback: () => Promise<void>;
   query: <T>(query: string, values?: any[]) => Promise<QueryResult<T>>;
-  close: () => void;
 }
 
 export type DbActionTransform<T> = {

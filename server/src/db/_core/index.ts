@@ -21,24 +21,12 @@ export const db = new Pool(config);
 
 const makeDbClient = (client: PoolClient): DbClient => {
   return Object.freeze({
-    begin: async () => {
-      await client.query('BEGIN');
-    },
-    commit: async () => {
-      await client.query('COMMIT');
-    },
-    rollback: async () => {
-      await client.query('ROLLBACK');
-    },
     query: async (query, values) => {
-      const { rows, rowCount, } = await db.query(query, values);
+      const { rows, rowCount, } = await client.query(query, values);
       return {
         rows,
         count: rowCount,
       };
-    },
-    close: () => {
-      client.release(true);
     },
   });
 };
@@ -53,9 +41,19 @@ export const makeDb = (): Db => {
       };
     },
 
-    transaction: async () => {
+    transaction: async (cb) => {
       const client = await db.connect();
-      return makeDbClient(client);
+
+      try {
+        await client.query('BEGIN');
+        await cb(makeDbClient(client));
+        await client.query('COMMIT');
+      } catch (err) {
+        await client.query('ROLLBACK');
+        throw err;
+      } finally {
+        client.release(true);
+      }
     },
 
     close: async () => {
@@ -70,17 +68,9 @@ export const makeTransactionWrapper = (db: Db) => {
     ...args: any[]
   ): Promise<Awaited<ReturnType<T>>> => {
     let ret: any;
-    const client = await db.transaction();
-    try {
-      await client.begin();
+    await db.transaction(async (client) => {
       ret = await func(client, ...args);
-      await client.begin();
-    } catch (err) {
-      await client.rollback();
-      throw err;
-    } finally {
-      client.close();
-    }
+    });
     return ret;
   };
 };

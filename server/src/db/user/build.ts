@@ -106,7 +106,7 @@ const makeUserDb = ({
     },
   };
 
-  const userDb = makeDbAdapter(db, userDbClient);
+  const userDb = makeDbAdapter(db, userDbClient, [ 'getByUsername' ]);
   return Object.freeze(userDb);
 };
 
