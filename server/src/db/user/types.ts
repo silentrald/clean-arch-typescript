@@ -13,14 +13,17 @@ export interface UserDbConfig<S> {
   table: Table<S>;
 }
 
+// Support for joining values, use extends to add other values
+// export interface UserJoin extends UserSchema;
+
 export interface UserDbAction {
-  getById: (id: string, columns?: (keyof UserSchema)[]) => Promise<UserSchema>;
-  getByUsername: (username: string, columns?: (keyof UserSchema)[]) => Promise<UserSchema>;
-  getByEmail: (email: string, columns?: (keyof UserSchema)[]) => Promise<UserSchema>;
   add: (user: User) => Promise<string>;
-  updateInfo: (user: User) => Promise<boolean>;
-  updatePassword: (user: User) => Promise<boolean>;
-  del: (id: string) => Promise<boolean>;
+  getById: (id: string) => Promise<UserSchema>;
+  getByUsername: (username: string) => Promise<UserSchema>;
+  getByEmail: (email: string) => Promise<UserSchema>;
+  updateInfoById: (user: User) => Promise<boolean>;
+  updatePasswordById: (user: User) => Promise<boolean>;
+  removeById: (id: string) => Promise<boolean>;
 }
 
 export type UserDbClient = DbActionTransform<UserDbAction>;

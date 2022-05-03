@@ -1,9 +1,15 @@
 import buildMakeUser from './build';
 import { UserSchema } from './types';
-import userSchema from './schema';
-import { createValidator, parseValidatorErrors } from '@modules/validate';
+import { userTable } from './table';
+import tableToSchema from '@modules/object-table';
+import {
+  createValidatorErrors, createValidator, parseValidatorErrors
+} from '@modules/validate';
 import bcrypt from 'bcrypt';
 
+
+const userSchema = tableToSchema(userTable);
+createValidatorErrors(userSchema);
 const validator = createValidator(userSchema);
 const validate = (user: UserSchema): string[] | undefined => {
   const valid = validator(user);

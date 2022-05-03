@@ -123,8 +123,10 @@ const buildMakeDynamicMigration = ({ client, defaults, }: DynamicMigrationBuilde
         if (val.default) {
           if (val.default === true && val.type === 'uuid') {
             tmp = tmp.default(qb.raw('uuid_generate_v4()'));
+          } else if (val.default === 'now()' && val.type === 'timestamp') {
+            tmp = tmp.default(qb.raw('now()'));
           } else {
-            tmp = val.default;
+            tmp = tmp.default(val.default);
           }
         }
 

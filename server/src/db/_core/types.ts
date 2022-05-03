@@ -3,6 +3,10 @@ export interface QueryResult<T> {
   count: number;
 }
 
+export interface DbConfig {
+  client: 'pg';
+}
+
 export interface Db {
   query: <T>(query: string, values?: any[]) => Promise<QueryResult<T>>;
   transaction: (cb: (client: DbClient) => Promise<void>) => Promise<void>;

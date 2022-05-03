@@ -1,17 +1,16 @@
 import makeUser from '@entities/user';
-import { User } from '@entities/user/types';
 import { UserList, UserListConfig } from './types';
 
-
-const makeUserList = ({ userDb, }: UserListConfig) => {
+const makeUserList = ({ userDb, }: UserListConfig): UserList => {
 
   const userList: UserList = {
-    addUser: async (user: User) => {
+    addUser: async (us) => {
+      const user = makeUser(us);
       await user.hashPassword();
-      await userDb.add(user);
+      return await userDb.add(user);
     },
 
-    getUserById: async (id: string) => {
+    getUserById: async (id) => {
       const s = await userDb.getById(id);
 
       const user = makeUser(s);
@@ -20,7 +19,7 @@ const makeUserList = ({ userDb, }: UserListConfig) => {
       return user;
     },
 
-    getUserByUsername: async (username: string) => {
+    getUserByUsername: async (username) => {
       const s = await userDb.getByUsername(username);
 
       const user = makeUser(s);
@@ -29,7 +28,7 @@ const makeUserList = ({ userDb, }: UserListConfig) => {
       return user;
     },
 
-    getUserByEmail: async (email: string) => {
+    getUserByEmail: async (email) => {
       const s = await userDb.getByEmail(email);
 
       const user = makeUser(s);
@@ -38,11 +37,12 @@ const makeUserList = ({ userDb, }: UserListConfig) => {
       return user;
     },
 
-    updateUserInfoById: async (user: User) => {
+    updateUserInfoById: async (us) => {
+      const user = makeUser(us);
       return await userDb.updateInfo(user);
     },
 
-    updateUserPasswordById: async (id: string, password: string) => {
+    updateUserPasswordById: async (id, password) => {
       const user = makeUser({
         id,
         username: 'username',

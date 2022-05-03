@@ -1,112 +1,158 @@
-import { makeDbAdapter } from '@db/_core';
-import { User, UserSchema } from '@entities/user/types';
-import makeDynamicQuery from '@modules/dynamic-query';
-import UserDbError from './error';
+import { makeDbAdapter } from '@db/_core/build';
+import { UserSchema } from '@entities/user/types';
+import UserDbError, { userDbErrors } from './error';
 import {
   UserDb, UserDbClient, UserDbConfig
 } from './types';
 
-// CRUD Functionalities
 const makeUserDb = ({
   db, validate, table,
 }: UserDbConfig<UserSchema>): UserDb => {
   const TABLE = `${table.schema}.${table.name}`;
 
-  const {
-    dynamicSelectOne,
-    dynamicInsert,
-    dynamicDelete,
-  } = makeDynamicQuery<User, UserSchema>({
-    mapping: {
-      id: 'getId',
-      username: 'getUsername',
-      password: 'getHash',
-      email: 'getEmail',
-      fname: 'getFname',
-      lname: 'getLname',
-    },
-    table,
-  });
+  // Only use query builder to build queries that aren't statically built like joining other tables
+  // Reasoning: The queries only support postgres queries anyway so it can't be standardized
+  //            If another database(mysql, nosql) will be used, the data access part will be editted
+  // Only supports postgres query
+  const insertQuery = `
+    INSERT INTO ${TABLE} (
+      username, password, email,
+      fname, lname
+    )
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING id;
+  `;
 
-  const { dynamicUpdate, } = makeDynamicQuery<User, UserSchema>({
-    mapping: {
-      id: 'getId',
-      username: 'getUsername',
-      email: 'getEmail',
-      fname: 'getFname',
-      lname: 'getLname',
-    },
-    table,
-  });
+  // SELECTS
+  const selectQueryById = `
+    SELECT  *
+    FROM    ${TABLE}
+    WHERE   id=$1
+    LIMIT   1;
+  `;
+
+  const selectQueryByUsername = `
+    SELECT  *
+    FROM    ${TABLE}
+    WHERE   username=$1
+    LIMIT   1;
+  `;
+
+  const selectQueryByEmail = `
+    SELECT  *
+    FROM    ${TABLE}
+    WHERE   email=$1
+    LIMIT   1;
+  `;
+
+  // UPDATES
+  const updateInfoQueryById = `
+    UPDATE  ${TABLE}
+    SET     fname=$2,
+            lname=$3
+    WHERE   id=$1;
+  `;
+
+  const updatePasswordQueryById = `
+    UPDATE  ${TABLE}
+    SET     password=$2
+    WHERE   id=$1;
+  `;
+
+  // DELETES
+  const removeQueryById = `DELETE FROM ${TABLE} WHERE id=$1;`;
 
   const userDbClient: UserDbClient = {
     add: async (client, user) => {
-      if (user.getPassword() === undefined && user.getHash() === undefined) {
-        throw new UserDbError([ 'invalid_password' ]);
+      if (!user.getHash()) {
+        throw new UserDbError([ userDbErrors.invalidPassword ]);
       }
 
-      const { query, values, } = dynamicInsert!(user);
-      const { rows, } = await client.query<UserSchema>(query, values);
+      const { rows, } = await client.query<UserSchema>(insertQuery, [
+        user.getUsername(),
+        user.getHash(),
+        user.getEmail(),
+        user.getFname(),
+        user.getLname()
+      ]);
 
       return rows[0].id!;
     },
 
-    getById: async (client, id, columns) => {
-      const { query, values, } = dynamicSelectOne!('id', id, columns);
-      const { rows, } = await client.query<UserSchema>(query, values);
+    getById: async (client, id) => {
+      if (!validate.id(id)) {
+        throw new UserDbError([ userDbErrors.invalidId ]);
+      }
+
+      const { rows, count, } = await client.query<UserSchema>(selectQueryById, [ id ]);
+
+      if (count < 1) {
+        throw new UserDbError([ userDbErrors.notFound ]);
+      }
 
       return rows[0];
     },
 
-    getByUsername: async (client, username, columns) => {
-      const { query, values, } = dynamicSelectOne!('username', username, columns);
-      const { rows, } = await client.query<UserSchema>(query, values);
+    getByUsername: async (client, username) => {
+      const { rows, count, } = await client.query<UserSchema>(selectQueryByUsername, [ username ]);
+
+      if (count < 1) {
+        throw new UserDbError([ userDbErrors.notFound ]);
+      }
 
       return rows[0];
     },
 
-    getByEmail: async (client, email, columns) => {
-      const { query, values, } = dynamicSelectOne!('email', email, columns);
-      const { rows, } = await client.query<UserSchema>(query, values);
+    getByEmail: async (client, email) => {
+      const { rows, count, } = await client.query<UserSchema>(selectQueryByEmail, [ email ]);
+
+      if (count < 1) {
+        throw new UserDbError([ userDbErrors.notFound ]);
+      }
 
       return rows[0];
     },
 
-    updateInfo: async (client, user) => {
-      const { query, values, } = dynamicUpdate!(user);
-      const { count, } = await client.query<UserSchema>(query, values);
+    updateInfoById: async (client, user) => {
+      if (!user.getId()) {
+        throw new UserDbError([ userDbErrors.missingId ]);
+      }
+
+      const { count, } = await client.query<UserSchema>(updateInfoQueryById, [
+        user.getId(),
+        user.getFname(),
+        user.getLname()
+      ]);
       return count === 1;
     },
 
-    updatePassword: async (client, user) => {
-      if (user.getId() === undefined || !validate.id(user.getId()!)) {
-        throw new UserDbError([ 'invalid_id' ]);
+    updatePasswordById: async (client, user) => {
+      if (!user.getId()) {
+        throw new UserDbError([ userDbErrors.missingId ]);
       }
 
       if (!user.getHash()) {
-        throw new UserDbError([ 'invalid_hash' ]);
+        throw new UserDbError([ userDbErrors.missingPassword ]);
       }
 
-      // Only supports psql
-      const { count, } = await client.query<UserSchema>(`
-        UPDATE  ${TABLE}
-        SET     password=$1
-        WHERE   id=$2;
-      `, [
-        user.getHash(), user.getId()
+      const { count, } = await client.query<UserSchema>(updatePasswordQueryById, [
+        user.getId(), user.getHash()
       ]);
 
       return count === 1;
     },
 
-    del: async (client, id) => {
-      const { query, values, } = dynamicDelete!(id);
-      const { count, } = await client.query<UserSchema>(query, values);
+    removeById: async (client, id) => {
+      if (!validate.id(id)) {
+        throw new UserDbError([ userDbErrors.invalidId ]);
+      }
+
+      const { count, } = await client.query<UserSchema>(removeQueryById, [ id ]);
       return count === 1;
     },
   };
 
-  const userDb = makeDbAdapter(db, userDbClient, [ 'getByUsername' ]);
+  const userDb = makeDbAdapter(db, userDbClient);
   return Object.freeze(userDb);
 };
 

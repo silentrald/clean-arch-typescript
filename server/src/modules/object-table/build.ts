@@ -11,7 +11,7 @@ const makeTableToSchema = ({ camelToSnakeCase, }: ColumnToSchemaConfig) => {
     for (const col in columns) {
       const val = columns[col];
 
-      if (!val.nullable)
+      if (!val.nullable && val.default === undefined)
         required.push(col);
 
       let property: { [key: string]: any } = {};
