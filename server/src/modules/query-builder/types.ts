@@ -11,13 +11,13 @@ interface Join {
   type: JoinType;
 }
 
-interface Where {
+export interface Where {
   condition: string;
   operator: 'and' | 'or';
 }
 
 interface QueryObjectCommon {
-  type?: 'select' | 'insert';
+  type?: 'select' | 'insert' | 'update' | 'delete';
   schema?: string;
   from?: string;
 
@@ -25,7 +25,7 @@ interface QueryObjectCommon {
 }
 
 export interface QueryObjectSelect extends QueryObjectCommon {
-  type?: 'select';
+  // type?: 'select';
   select?: string | Record<string, string>;
   joins?: Join[];
   wheres?: Where[];
@@ -34,24 +34,41 @@ export interface QueryObjectSelect extends QueryObjectCommon {
   offset?: number;
 }
 
+// TODO: On Conflict
 export interface QueryObjectInsert extends QueryObjectCommon {
-  type?: 'insert';
+  // type?: 'insert';
   columns?: string[];
   inserts?: Record<string, any>[];
   returning?: string | Record<string, string>;
 }
 
-export type QueryObject = QueryObjectSelect & QueryObjectInsert;
+// TODO: On Conflict
+export interface QueryObjectUpdate extends QueryObjectCommon {
+  // type?: 'update';
+  update?: Record<string, any>;
+  wheres?: Where[];
+  returning?: string | Record<string, string>;
+}
+
+export interface QueryObjectDelete extends QueryObjectCommon {
+  // type?: 'delete';
+  wheres?: Where[];
+}
+
+export type QueryObject = QueryObjectSelect &
+  QueryObjectInsert &
+  QueryObjectUpdate &
+  QueryObjectDelete;
 
 export interface QueryBuilder {
   // COMMON
   schema: (s: string) => QueryBuilder;
   from: (table: string) => QueryBuilder;
+  where: (condition: string, operator?: 'and' | 'or') => QueryBuilder;
 
   // SELECT
   select: (sel?: Record<string, string>) => QueryBuilder;
   join: (table: string, condition: string, type?: JoinType) => QueryBuilder;
-  where: (condition: string, operator?: 'and' | 'or') => QueryBuilder;
   orderBy: (orders: Record<string, 'asc' | 'desc'>) => QueryBuilder;
   limit: (lmt: number) => QueryBuilder;
   offset: (off: number) => QueryBuilder;
@@ -59,6 +76,12 @@ export interface QueryBuilder {
   // INSERT
   insert: (inserts: Record<string, any>[], columns?: string[]) => QueryBuilder;
   returning: (ret?: string | Record<string, string>) => QueryBuilder;
+
+  // UPDATE
+  update: (up: Record<string, any>) => QueryBuilder;
+
+  // DELETE
+  del: () => QueryBuilder;
 
   // FUNCTIONS
   value: (val: any) => string;

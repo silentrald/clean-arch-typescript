@@ -5,7 +5,6 @@
   "license": "MIT",
   "scripts": {
     "dev": "ts-node-dev -r tsconfig-paths/register src/app",
-    "sample": "ts-node -r tsconfig-paths/register src/tests/sample",
     "build": "tsc",
     "start": "node dist/app",
     "devtest": "nodemon -e ts,spec.ts --exec 'yarn test && ts-node -r tsconfig-paths/register' src/app",

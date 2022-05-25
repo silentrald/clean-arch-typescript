@@ -1,8 +1,29 @@
 import {
-  QueryResult, QueryBuilder, QueryObjectSelect, QueryObject, QueryObjectInsert
+  QueryResult,
+  QueryBuilder,
+  QueryObject,
+  QueryObjectSelect,
+  QueryObjectInsert,
+  QueryObjectDelete,
+  QueryObjectUpdate,
+  Where
 } from './types';
 
 const makeQueryBuilder: (() => () => QueryBuilder) = () => {
+  const createWhere = (wheres: Where[]): string => {
+    if (wheres.length === 0)
+      return '';
+
+    let query = '';
+    const first = wheres.shift()!;
+    query += ` where ${first.condition}`;
+    for (const { condition, operator, } of wheres)
+      query += ` ${operator} ${condition}`;
+    wheres.unshift(first);
+
+    return query;
+  };
+
   const createSelect = (qo: QueryObjectSelect): QueryResult => {
     if (!qo.from) {
       throw new Error('No table was declared');
@@ -33,11 +54,7 @@ const makeQueryBuilder: (() => () => QueryBuilder) = () => {
     }
 
     if (qo.wheres) {
-      const first = qo.wheres.shift()!;
-      selectQuery += ` where ${first.condition}`;
-      for (const { condition, operator, } of qo.wheres)
-        selectQuery += ` ${operator} ${condition}`;
-      qo.wheres.unshift(first);
+      selectQuery += createWhere(qo.wheres);
     }
 
     // TODO: Group By Clause
@@ -102,6 +119,43 @@ const makeQueryBuilder: (() => () => QueryBuilder) = () => {
     };
   };
 
+  const createUpdate = (qo: QueryObjectUpdate): QueryResult => {
+    const table = `${qo.schema || 'public'}.${qo.from}`;
+    let updateQuery = `update ${table} set `;
+
+    const updates: string[] = [];
+    for (const key in qo.update!) {
+      // Note: Should not be user accessible, or input needs sanitation
+      // eslint-disable-next-line security/detect-object-injection
+      const val = qo.update[key];
+      updates.push(`${key} = ${val}`);
+    }
+    updateQuery += updates.join(', ');
+
+    if (qo.wheres) {
+      updateQuery += createWhere(qo.wheres);
+    }
+
+    return {
+      query: updateQuery + ';',
+      values: qo.values || [],
+    };
+  };
+
+  const createDelete = (qo: QueryObjectDelete): QueryResult => {
+    const table = `${qo.schema || 'public'}.${qo.from}`;
+    let deleteQuery = `delete from ${table}`;
+
+    if (qo.wheres) {
+      deleteQuery += createWhere(qo.wheres);
+    }
+
+    return {
+      query: deleteQuery + ';',
+      values: qo.values || [],
+    };
+  };
+
   const queryBuilderFunction = (qo: QueryObject) => {
     let i = 0;
 
@@ -116,12 +170,23 @@ const makeQueryBuilder: (() => () => QueryBuilder) = () => {
         return qb;
       },
 
+      where: (condition, operator) => {
+        if (!qo.wheres)
+          qo.wheres = [];
+
+        qo.wheres.push({
+          condition,
+          operator: operator || 'and',
+        });
+        return qb;
+      },
+
       // SELECT
       select: (sel) => {
         if (qo.type)
           throw new Error(`Cannot add select within ${qo.type} statement`);
 
-        (qo as any).type = 'select';
+        qo.type = 'select';
         qo.select = sel || '*';
         return qb;
       },
@@ -135,17 +200,6 @@ const makeQueryBuilder: (() => () => QueryBuilder) = () => {
           table,
           condition,
           type: type || 'inner',
-        });
-        return qb;
-      },
-
-      where: (condition, operator) => {
-        if (!qo.wheres)
-          qo.wheres = [];
-
-        qo.wheres.push({
-          condition,
-          operator: operator || 'and',
         });
         return qb;
       },
@@ -170,7 +224,7 @@ const makeQueryBuilder: (() => () => QueryBuilder) = () => {
         if (qo.type)
           throw new Error(`Cannot add insert within ${qo.type} statement`);
 
-        (qo as any).type = 'insert';
+        qo.type = 'insert';
         qo.inserts = inserts;
 
         if (!columns)
@@ -182,6 +236,25 @@ const makeQueryBuilder: (() => () => QueryBuilder) = () => {
 
       returning: (ret) => {
         qo.returning = ret || '*';
+        return qb;
+      },
+
+      // UPDATE
+      update: (up) => {
+        if (qo.type)
+          throw new Error(`Cannot add update within ${qo.type} statement`);
+
+        qo.type = 'update';
+        qo.update = up;
+        return qb;
+      },
+
+      // DELETE
+      del: () => {
+        if (qo.type)
+          throw new Error(`Cannot add delete within ${qo.type} statement`);
+
+        qo.type = 'delete';
         return qb;
       },
 
@@ -204,6 +277,10 @@ const makeQueryBuilder: (() => () => QueryBuilder) = () => {
           return createSelect(qo);
         case 'insert':
           return createInsert(qo);
+        case 'update':
+          return createUpdate(qo);
+        case 'delete':
+          return createDelete(qo);
         }
         throw new Error('No query function was declared');
       },
